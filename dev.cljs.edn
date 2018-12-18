@@ -1,0 +1,10 @@
+^{:watch-dirs ["test" "src"]
+  :css-dirs ["resources/public/css"]
+  :auto-testing true}
+{:main protok.core
+ :preloads [devtools.preload]
+ :external-config
+ {:devtools/config
+  {:features-to-install    [:formatters :hints]
+   :fn-symbol              "F"
+   :print-config-overrides true}}}

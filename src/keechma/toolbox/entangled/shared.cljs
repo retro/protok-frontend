@@ -1,0 +1,14 @@
+(ns keechma.toolbox.entangled.shared)
+
+(def id :keechma.toolbox.entangled/id)
+
+(defrecord ComponentCommand [id args])
+
+(defn get-app-db-path [ctx]
+  (get-in ctx [:keechma.toolbox.entangled/component :app-db-path]))
+
+(defn get-id [ctx]
+  (get-in ctx [:keechma.toolbox.entangled/component :component-id]))
+
+(defn get-name [ctx]
+  (get-in ctx [:keechma.toolbox.entangled/component :component-name]))

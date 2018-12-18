@@ -1,0 +1,9 @@
+/target
+/checkouts
+/.lein-*
+/.nrepl-port
+/resources/public/js
+/*-init.clj
+/*.log
+out
+/resources/public/cljs-out/
