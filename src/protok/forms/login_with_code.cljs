@@ -2,7 +2,10 @@
   (:require [keechma.toolbox.forms.core :as forms-core]
             [protok.forms.validators :as v]
             [keechma.toolbox.pipeline.core :as pp :refer-macros [pipeline!]]
-            [protok.domain.db :as db]))
+            [protok.domain.db :as db]
+            [protok.gql :as gql]
+            [protok.util.local-storage :refer [ls-set!]]
+            [protok.settings :refer [jwt-ls-name]]))
 
 (defrecord Form [validator])
 
@@ -15,10 +18,17 @@
 (defmethod forms-core/get-data Form [this app-db form-props]
   {:email (db/get-login-requested-for app-db)})
 
-(defmethod forms-core/submit-data Form [_ app-db _ data])
+(defmethod forms-core/submit-data Form [_ app-db _ data]
+  (gql/m! [:login-with-code :loginWithCode] data))
 
-(defmethod forms-core/on-submit-success Form [this app-db form-props data]
-  (pipeline! [value app-db]))
+(defmethod forms-core/on-submit-success Form [this app-db form-props {:keys [account token] :as data}]
+  (pipeline! [value app-db]
+    (pp/commit!
+     (-> app-db
+         (db/assoc-jwt token)
+         (db/set-current-account account)))
+    (ls-set! jwt-ls-name token)
+    (pp/reroute!)))
 
 (defn constructor []
   (->Form (v/to-validator {:email [:not-empty :email]

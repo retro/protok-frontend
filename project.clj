@@ -16,7 +16,9 @@
                  [medley "1.0.0"]
                  [com.rpl/specter "1.1.1"]
                  [clj-tagsoup "0.3.0" :exclusions [org.clojure/clojure org.clojure/data.xml]]
-                 [org.clojure/data.xml "0.0.8"]]
+                 [org.clojure/data.xml "0.0.8"]
+                 [floatingpointio/graphql-builder "0.1.8"]
+                 [hodgepodge "0.1.3"]]
 
   :source-paths ["src" "test"]
 
@@ -27,8 +29,7 @@
 
   :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.1.9"]
                                   [com.bhauman/rebel-readline-cljs "0.1.4"]
-                                  [com.bhauman/cljs-test-display "0.1.1"]]
-                   }})
+                                  [com.bhauman/cljs-test-display "0.1.1"]]}})
 
 
 

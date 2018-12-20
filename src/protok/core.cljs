@@ -11,14 +11,18 @@
             [protok.forms :as protok-forms]
             [protok.styles :refer [stylesheet]]
             [keechma.toolbox.entangled.app :as entangled]
-            [keechma.toolbox.css.app :as css]))
+            [keechma.toolbox.css.app :as css]
+            [protok.domain.route :as route]))
 
 
 (def app-definition
   (-> {:components    ui
        :controllers   controllers
        :subscriptions subscriptions
-       :html-element  (.getElementById js/document "app")}
+       :html-element  (.getElementById js/document "app")
+       :routes [["" {:page "organizations"}]
+                ":page"]
+       :route-processor route/processor}
       (dataloader/install datasources edb-schema)
       (forms/install protok-forms/forms protok-forms/forms-automount-fns)
       (css/install (stylesheet))

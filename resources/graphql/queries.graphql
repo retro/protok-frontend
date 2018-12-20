@@ -1,0 +1,24 @@
+mutation RequestLoginCode($email: String!) {
+  requestLoginCode(email: $email)
+}
+
+mutation LoginWithCode($email: String!, $code: String!) {
+  loginWithCode(email: $email, code: $code) {
+    account {
+      ...accountData
+    }
+    token
+  }
+}
+
+query CurrentAccount {
+  currentAccount {
+    ...accountData
+  }
+}
+
+fragment accountData on Account {
+  id
+  username
+  email
+}

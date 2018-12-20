@@ -1,9 +1,13 @@
 (ns protok.ui
   (:require [protok.ui.main :as main]
             [protok.ui.editor :as editor]
-            [protok.ui.login :as login]))
+            [protok.ui.login :as login]
+            [protok.ui.organizations :as organizations]
+            [protok.ui.loading :as loading]))
 
 (def ui
-  {:main   main/component
-   :editor editor/component
-   :login  login/component})
+  {:main          main/component
+   :editor        editor/component
+   :login         login/component
+   :organizations organizations/component
+   :loading       loading/component})

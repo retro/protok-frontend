@@ -1,13 +1,12 @@
 (ns protok.subscriptions
-  (:require [keechma.toolbox.dataloader.subscriptions :as dataloader]
-            [protok.edb :refer [edb-schema]]
-            [protok.datasources  :refer [datasources]])
+  (:require [protok.edb :refer [edb-schema]]
+            [protok.domain.db :as db])
   (:require-macros [reagent.ratom :refer [reaction]]))
 
-(defn get-kv [key]
-  (fn [app-db-atom]
+(defn as-sub [getter-fn]
+  (fn [app-db-atom & args]
     (reaction
-     (get-in @app-db-atom (flatten [:kv key])))))
+     (apply getter-fn @app-db-atom args))))
 
 (def subscriptions
-  {})
+  {:initialized? (as-sub db/get-initialized?)})
