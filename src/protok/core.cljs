@@ -8,10 +8,11 @@
             [protok.subscriptions :refer [subscriptions]]
             [protok.edb :refer [edb-schema]]
             [protok.datasources :refer [datasources]]
-            [protok.forms :as sf-forms]
+            [protok.forms :as protok-forms]
             [protok.styles :refer [stylesheet]]
             [keechma.toolbox.entangled.app :as entangled]
             [keechma.toolbox.css.app :as css]))
+
 
 (def app-definition
   (-> {:components    ui
@@ -19,7 +20,7 @@
        :subscriptions subscriptions
        :html-element  (.getElementById js/document "app")}
       (dataloader/install datasources edb-schema)
-      (forms/install sf-forms/forms sf-forms/forms-automount-fns)
+      (forms/install protok-forms/forms protok-forms/forms-automount-fns)
       (css/install (stylesheet))
       (entangled/install)))
 
