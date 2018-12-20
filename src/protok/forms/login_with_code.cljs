@@ -1,7 +1,8 @@
 (ns protok.forms.login-with-code
   (:require [keechma.toolbox.forms.core :as forms-core]
             [protok.forms.validators :as v]
-            [keechma.toolbox.pipeline.core :as pp :refer-macros [pipeline!]]))
+            [keechma.toolbox.pipeline.core :as pp :refer-macros [pipeline!]]
+            [protok.domain.db :as db]))
 
 (defrecord Form [validator])
 
@@ -12,7 +13,7 @@
       (pp/send-command! [forms-core/id-key :unmount-form] [:login-with-code :form]))))
 
 (defmethod forms-core/get-data Form [this app-db form-props]
-  {:email (get-in app-db [:kv :login-requested-for])})
+  {:email (db/get-login-requested-for app-db)})
 
 (defmethod forms-core/submit-data Form [_ app-db _ data])
 

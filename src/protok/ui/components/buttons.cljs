@@ -2,7 +2,8 @@
   (:require [keechma.toolbox.css.core :refer-macros [defelement]]
             [keechma.toolbox.util :refer [class-names]]
             [clojure.string :as str]
-            [protok.styles.colors :refer [colors]]))
+            [protok.styles.colors :refer [colors]]
+            [protok.icons :refer [icon]]))
 
 (def button-classes
   [:bw2 :center :overflow-hidden :relative])
@@ -13,6 +14,7 @@
     {:border-color (colors :blue-3)
      :background-color (colors :blue-3)
      :color (colors :white)}
+    [:svg ["path:not([fill='none'])" {:fill (colors :white)}]]
     [:&:hover
      {:background (colors :blue-2)
       :border-color (colors :blue-2)}]]
@@ -20,14 +22,17 @@
     {:border-color (colors :blue-7)
      :background-color "white" 
      :color (colors :blue-4)}
+    [:svg ["path:not([fill='none'])" {:fill (colors :blue-4)}]]
     [:&:hover
      {:background-color (colors :blue-9)
       :border-color (colors :blue-6)
-      :color (colors :blue-3)}]]
+      :color (colors :blue-3)}
+     [:svg ["path:not([fill='none'])" {:fill (colors :blue-3)}]]]]
    [:&.type-dangerous
     {:border-color (colors :red-4)
      :background-color (colors :red-4)
      :color (colors :white)}
+    [:svg ["path:not([fill='none'])" {:fill (colors :white)}]]
     [:&:hover
      {:background (colors :red-3)
       :border-color (colors :red-3)}]]
@@ -35,37 +40,47 @@
     {:border-color "transparent" 
      :background-color "transparent" 
      :color (colors :blue-4)}
+    [:svg ["path:not([fill='none'])" {:fill (colors :blue-4)}]]
     [:&:hover
      {:color (colors :blue-3)
-      :text-decoration "underline"}]]
+      :text-decoration "underline"}
+     [:svg ["path:not([fill='none'])" {:fill (colors :blue-3)}]]]]
    [:&.size-big
     {:padding "0 20px"
      :height "44px"
      :line-height "40px"}
+    [:&:focus:active
+     {:top "1px"
+      :transform "scale(0.99)"}]
     [:.protok_ui_components_buttons--icon-wrap
      {:width "36px"
-      :top "4px"
+      :top "5px"
       :position "relative"}
      [:&.icon-wrap-left
       {:margin-left "-14px"}]
      [:&.icon-wrap-right
       {:margin-right "-14px"}]
-     [:.material-icons
-      {:font-size "20px"}]]]
+     [:svg
+      {:width "22px"
+       :height "22px"}]]]
    [:&.size-small
     {:padding "0 15px"
      :height "32px"
      :line-height "28px"}
+    [:&:focus:active
+     {:top "1px"
+      :transform "scale(0.99)"}]
     [:.protok_ui_components_buttons--icon-wrap
      {:position :relative
       :width "28px"
-      :top "3px"}
+      :top "4px"}
      [:&.icon-wrap-left
       {:margin-left "-8px"}]
      [:&.icon-wrap-right
       {:margin-right "-8px"}]
-     [:.material-icons
-      {:font-size "16px"}]]]
+     [:svg
+      {:width "18px"
+       :height "18px"}]]]
    [:&:disabled
     {:opacity 0.5}]
    [:&.pill
@@ -93,14 +108,14 @@
   (let [all-classes (map name (filter (complement nil?) (flatten [classes])))]
     (str/join " " all-classes)))
 
-(defn render-icon [side icon]
-  (when icon
+(defn render-icon [side icon-content]
+  (when icon-content
     [-icon-wrap
      {:class (class-names {:icon-wrap-left (= :left side)
                            :icon-wrap-right (= :right side)})}
-     (if (keyword? icon)
-       [:i {:class [:material-icons]} (name icon)]
-       icon)]))
+     (if (keyword? icon-content)
+       (icon icon-content)
+       icon-content)]))
 
 (defn make-button [default-props]
   (fn button
@@ -143,5 +158,5 @@
 (def dangerous-big (make-button {:button/type :dangerous :button/size :big}))
 (def dangerous-small (make-button {:button/type :dangerous :button/size :small}))
 
-(def link-big (make-button {:button/type :link :button/size :big}))
-(def link-small (make-button {:button/type :link :button/size :small}))
+(def link-big (make-button {:button/type :link :button/size :big :type :button}))
+(def link-small (make-button {:button/type :link :button/size :small :type :button}))

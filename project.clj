@@ -14,7 +14,9 @@
                  [org.clojars.mihaelkonjevic/garden-basscss "0.2.2"]
                  [binaryage/oops "0.6.2"]
                  [medley "1.0.0"]
-                 [com.rpl/specter "1.1.1"]]
+                 [com.rpl/specter "1.1.1"]
+                 [clj-tagsoup "0.3.0" :exclusions [org.clojure/clojure org.clojure/data.xml]]
+                 [org.clojure/data.xml "0.0.8"]]
 
   :source-paths ["src" "test"]
 

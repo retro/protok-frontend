@@ -18,7 +18,7 @@
           :width "90%"})
 
 (defelement -logo-wrap
-  :class [:flex :justify-center :bdb-neutral-8 :bwb1 :bwt5 :bdt-neutral-7])
+  :class [:flex :justify-center :bdb-neutral-8 :bwb1 :bwt5 :bdt-blue-7])
 
 (defelement -inner-logo-wrap
   :class [:py3]
@@ -33,9 +33,13 @@
   (let [form-props [:request-login-code :form]
         form-state (forms-ui/form-state> ctx form-props)
         state (get-in form-state [:state :type])]
-    (when (not= :submitted state)
+    (when (and form-state
+               (not= :submitted state))
       [:form {:on-submit #(forms-ui/<submit ctx form-props %)}
-       [inputs/text ctx form-props :email {:label "Your Email" :placeholder "email@example.com"}]
+       [inputs/text ctx form-props :email
+        {:label "Your Email"
+         :placeholder "email@example.com"
+         :auto-focus true}]
        [:div.flex.justify-end
         [buttons/secondary-small
          {:button/pill true
@@ -47,17 +51,21 @@
         form-state (forms-ui/form-state> ctx form-props)]
     (when (forms-ui/value-in> ctx form-props :email)
       [:form {:on-submit #(forms-ui/<submit ctx form-props %)}
-       [inputs/text ctx form-props :email {:label "Your Email" :placeholder "email@example.com" :disabled true}]
-       [inputs/text ctx form-props :code {:placeholder "Example: x1f35mg9aWidJ23" :label "Enter code"}]
+       [inputs/text ctx form-props :email 
+        {:label "Your Email"
+         :placeholder "email@example.com"
+         :disabled true}]
+       [inputs/text ctx form-props :code
+        {:placeholder "Example: x1f35mg9aWidJ23"
+         :label "Enter code"
+         :auto-focus true}]
        [:div.flex.justify-end
         [buttons/link-small
-         {:on-click (fn [e]
-                      (.preventDefault e)
-                      (forms-ui/<call ctx form-props :reset-login-flow))}
+         {:on-click #(forms-ui/<call ctx form-props :reset-login-flow)}
          "Request new code"]
         [buttons/primary-small
          {:button/pill true
-          :icon/right :arrow_forward}
+          :icon/right :arrow-forward}
          "Login"]]])))
 
 (defn render [ctx]

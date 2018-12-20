@@ -13,13 +13,17 @@
   [{:padding "5px 9px"
     :box-shadow "0px 1px 0px white, 0px 2px 5px rgba(0,0,0,0.07) inset"
     :outline "none"
-    :transition "all 0.15s ease-in-out"}
+    :transition "border-color 0.15s ease-in-out"}
    [:&::placeholder {:color (colors :neutral-6)}]
    [:&:focus {:border-color (colors :blue-5)}]
    [:&.has-errors
     {:color (colors :red-3)
      :border-color (colors :red-8)}
-    [:&:focus {:border-color (colors :red-4)}]]])
+    [:&:focus {:border-color (colors :red-4)}]]
+   [:&:disabled
+    {:opacity 0.7
+     :cursor "not-allowed"
+     :background-color "rgba(0,0,0,.03)"}]])
 
 (defelement -fieldset
   :tag :fieldset
@@ -110,12 +114,13 @@
     [-fieldset
      [render-label input-props errors]
      [input-with-composition-support
-      {:placeholder (get-placeholder input-props)
-       :on-change #(forms-ui/<on-change ctx form-props attr %)
-       :on-blur #(forms-ui/<on-blur ctx form-props attr %)
-       :value (forms-ui/value-in> ctx form-props attr)
-       :type (or input-type :text)
-       :class (class-names {:has-errors (seq errors)})}]
+      (-> {:placeholder (get-placeholder input-props)
+           :on-change #(forms-ui/<on-change ctx form-props attr %)
+           :on-blur #(forms-ui/<on-blur ctx form-props attr %)
+           :value (forms-ui/value-in> ctx form-props attr)
+           :type (or input-type :text)
+           :class (class-names {:has-errors (seq errors)})}
+          (merge (select-keys input-props [:auto-focus :disabled])))]
      [render-errors errors]]))
 
 (defn textarea [ctx form-props attr {:keys [rows] :as input-props}]
@@ -135,7 +140,7 @@
    [-select
     {:on-change #(forms-ui/<on-change ctx form-props attr %)
      :value (or (forms-ui/value-in> ctx form-props attr) "")}
-    [:option {:value ""} (or (get-placeholder input-props))]
+    [:option {:value ""} (get-placeholder input-props)]
     (doall (map (fn [[value label]]
                   [:option {:value value :key value} label]) options))]
    [render-errors (forms-ui/errors-in> ctx form-props attr)]])
