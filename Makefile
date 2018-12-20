@@ -2,7 +2,7 @@
 
 build-prod-cljs :
 	lein clean
-	lein fig:min
+	lein cljsbuild once min
 
 netlify-deploy :
 	netlify deploy --dir resources/public

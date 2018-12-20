@@ -12,7 +12,7 @@
   {:email (db/get-login-requested-for app-db)})
 
 (defmethod forms-core/submit-data Form [_ app-db _ data]
-  (pipeline! [value app-db]
+  (pipeline! [value app-db] 
     (gql/m! [:request-login-code :requestLoginCode] data)
     data))
 

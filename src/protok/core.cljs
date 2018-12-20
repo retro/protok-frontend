@@ -1,4 +1,4 @@
-(ns ^:figwheel-hooks protok.core 
+(ns protok.core 
   (:require [reagent.core :as reagent]
             [keechma.app-state :as app-state]
             [keechma.toolbox.dataloader.app :as dataloader]
@@ -13,7 +13,6 @@
             [keechma.toolbox.entangled.app :as entangled]
             [keechma.toolbox.css.app :as css]
             [protok.domain.route :as route]))
-
 
 (def app-definition
   (-> {:components    ui
@@ -38,7 +37,7 @@
     (enable-console-print!)
     (println "dev mode")))
 
-(defn ^:after-load reload []
+(defn reload []
   (let [current @running-app]
     (if current
       (app-state/stop! current start-app!)

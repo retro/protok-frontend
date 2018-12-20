@@ -20,16 +20,63 @@
                  [floatingpointio/graphql-builder "0.1.8"]
                  [hodgepodge "0.1.3"]]
 
+
   :source-paths ["src" "test"]
 
-  :aliases {"fig"       ["trampoline" "run" "-m" "figwheel.main"]
-            "fig:build" ["trampoline" "run" "-m" "figwheel.main" "-b" "dev" "-r"]
-            "fig:min"   ["run" "-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]
-            "fig:test"  ["run" "-m" "figwheel.main" "-co" "test.cljs.edn" "-m" protok.test-runner]}
+  :plugins [[lein-cljsbuild "1.1.7"]]
 
-  :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.1.9"]
-                                  [com.bhauman/rebel-readline-cljs "0.1.4"]
-                                  [com.bhauman/cljs-test-display "0.1.1"]]}})
+  :clean-targets ^{:protect false} ["resources/public/js"
+                                    "target"
+                                    "test/js"]
+
+  :figwheel {:css-dirs ["resources/public/css"]}
+
+
+  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+
+  :profiles
+  {:dev
+   {:dependencies [[figwheel-sidecar "0.5.10"]
+                   [com.cemerick/piggieback "0.2.1"]
+                   [binaryage/devtools "0.8.2"]]
+
+    :plugins      [[lein-figwheel "0.5.16"]
+                   [lein-doo "0.1.7"]]}}
+
+  :cljsbuild
+  {:builds
+   [{:id           "dev"
+     :source-paths ["src"]
+     :figwheel     {:on-jsload "protok.core/reload"}
+     :compiler     {:main                 protok.core
+                    :optimizations        :none
+                    :output-to            "resources/public/js/app.js"
+                    :output-dir           "resources/public/js/dev"
+                    :asset-path           "js/dev"
+                    :source-map-timestamp true
+                    :preloads             [devtools.preload]
+                    :external-config
+                    {:devtools/config
+                     {:features-to-install    [:formatters :hints]
+                      :fn-symbol              "F"
+                      :print-config-overrides true}}}}
+
+    {:id           "min"
+     :source-paths ["src"]
+     :compiler     {:main            protok.core
+                    :optimizations   :advanced
+                    :output-to       "resources/public/js/app.js"
+                    :output-dir      "resources/public/js/min"
+                    :elide-asserts   true
+                    :closure-defines {goog.DEBUG false}
+                    :pretty-print    false}}
+
+    {:id           "test"
+     :source-paths ["src" "test"]
+     :compiler     {:output-to     "resources/public/js/test.js"
+                    :output-dir    "resources/public/js/test"
+                    :main          protok.runner
+                    :optimizations :none}}]})
 
 
 

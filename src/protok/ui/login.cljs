@@ -29,13 +29,20 @@
 
 (defelement -forms-wrap)
 
+(defn <submit-exclusive [ctx form-props ev]
+  (let [state (get-in (forms-ui/form-state> ctx form-props) [:state :Type])]
+    (if (not= :submitting state)
+      (forms-ui/<submit ctx form-props ev)
+      (.preventDefault ev))))
+
 (defn render-request-login-code-form [ctx]
   (let [form-props [:request-login-code :form]
         form-state (forms-ui/form-state> ctx form-props)
-        state (get-in form-state [:state :type])]
+        state (get-in form-state [:state :type])
+        submitting? (= :submitting state)]
     (when (and form-state
                (not= :submitted state))
-      [:form {:on-submit #(forms-ui/<submit ctx form-props %)}
+      [:form {:on-submit #(<submit-exclusive ctx form-props %)}
        [inputs/text ctx form-props :email
         {:label "Your Email"
          :placeholder "email@example.com"
@@ -43,14 +50,17 @@
        [:div.flex.justify-end
         [buttons/secondary-small
          {:button/pill true
-          :icon/right :email}
+          :icon/right (if submitting? :spinner :email)
+          :disabled submitting?}
          "Request Login Link"]]])))
 
 (defn render-login-with-code-form [ctx]
   (let [form-props [:login-with-code :form]
-        form-state (forms-ui/form-state> ctx form-props)]
+        form-state (forms-ui/form-state> ctx form-props)
+        state (get-in form-state [:state :type])
+        submitting? (= :submitting state)]
     (when (forms-ui/value-in> ctx form-props :email)
-      [:form {:on-submit #(forms-ui/<submit ctx form-props %)}
+      [:form {:on-submit #(<submit-exclusive ctx form-props %)}
        [inputs/text ctx form-props :email 
         {:label "Your Email"
          :placeholder "email@example.com"
@@ -65,7 +75,8 @@
          "Request new code"]
         [buttons/primary-small
          {:button/pill true
-          :icon/right :arrow-forward}
+          :icon/right (if submitting? :spinner :arrow-forward)
+          :disabled submitting?}
          "Login"]]])))
 
 (defn render [ctx]

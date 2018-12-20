@@ -14,7 +14,9 @@
     {:border-color (colors :blue-3)
      :background-color (colors :blue-3)
      :color (colors :white)}
-    [:svg ["path:not([fill='none'])" {:fill (colors :white)}]]
+    [:svg
+     ["path:not([fill='none'])" {:fill (colors :white)}]
+      [:.stroke {:stroke (colors :white)}]]
     [:&:hover
      {:background (colors :blue-2)
       :border-color (colors :blue-2)}]]
@@ -22,17 +24,23 @@
     {:border-color (colors :blue-7)
      :background-color "white" 
      :color (colors :blue-4)}
-    [:svg ["path:not([fill='none'])" {:fill (colors :blue-4)}]]
+    [:svg
+     ["path:not([fill='none'])" {:fill (colors :blue-4)}]
+      [:.stroke {:stroke (colors :blue-4)}]]
     [:&:hover
      {:background-color (colors :blue-9)
       :border-color (colors :blue-6)
       :color (colors :blue-3)}
-     [:svg ["path:not([fill='none'])" {:fill (colors :blue-3)}]]]]
+     [:svg
+      ["path:not([fill='none'])" {:fill (colors :blue-3)}]
+      [:.stroke {:stroke (colors :blue-3)}]]]]
    [:&.type-dangerous
     {:border-color (colors :red-4)
      :background-color (colors :red-4)
      :color (colors :white)}
-    [:svg ["path:not([fill='none'])" {:fill (colors :white)}]]
+    [:svg
+     ["path:not([fill='none'])" {:fill (colors :white)}]
+      [:.stroke {:stroke (colors :white)}]]
     [:&:hover
      {:background (colors :red-3)
       :border-color (colors :red-3)}]]
@@ -40,11 +48,15 @@
     {:border-color "transparent" 
      :background-color "transparent" 
      :color (colors :blue-4)}
-    [:svg ["path:not([fill='none'])" {:fill (colors :blue-4)}]]
+    [:svg
+     ["path:not([fill='none'])" {:fill (colors :blue-4)}]
+      [:.stroke {:stroke (colors :blue-4)}]]
     [:&:hover
      {:color (colors :blue-3)
       :text-decoration "underline"}
-     [:svg ["path:not([fill='none'])" {:fill (colors :blue-3)}]]]]
+     [:svg
+      ["path:not([fill='none'])" {:fill (colors :blue-3)}]
+       [:.stroke {:stroke (colors :blue-3)}]]]]
    [:&.size-big
     {:padding "0 20px"
      :height "44px"
@@ -57,9 +69,9 @@
       :top "5px"
       :position "relative"}
      [:&.icon-wrap-left
-      {:margin-left "-14px"}]
+      {:margin-left "-16px"}]
      [:&.icon-wrap-right
-      {:margin-right "-14px"}]
+      {:margin-right "-16px"}]
      [:svg
       {:width "22px"
        :height "22px"}]]]
@@ -75,9 +87,13 @@
       :width "28px"
       :top "4px"}
      [:&.icon-wrap-left
-      {:margin-left "-8px"}]
+      {:margin-left "-14px"}
+      [:.icon-email {:position "relative"
+                     :left "2px"}]]
      [:&.icon-wrap-right
-      {:margin-right "-8px"}]
+      {:margin-right "-14px"}
+      [:.icon-email {:position "relative"
+                     :right "2px"}]]
      [:svg
       {:width "18px"
        :height "18px"}]]]

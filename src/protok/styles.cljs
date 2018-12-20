@@ -6,7 +6,8 @@
             [protok.styles.colors :as colors]
             [protok.styles.helpers :as helpers]
             [clojure.string :as str]
-            [garden.units :refer [px rem em]])
+            [garden.units :refer [px rem em]]
+            [protok.icons :as icons])
   (:require-macros [garden.def :refer [defkeyframes]]))
 
 (def system-font-stack "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI','Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans','Droid Sans', 'Helvetica Neue', sans-serif")
@@ -36,6 +37,8 @@
    (core/stylesheet)
    (colors/stylesheet)
    (generate-border-widths)
+   icons/spinner-dash
+   icons/spinner-rotator
    @css/component-styles
    [:html {:height "100%"
            :font-size "16px" 
