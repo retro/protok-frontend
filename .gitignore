@@ -7,3 +7,6 @@
 /*.log
 out
 /resources/public/cljs-out/
+/node_modules
+/.cache
+/dist
