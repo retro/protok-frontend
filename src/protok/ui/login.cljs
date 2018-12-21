@@ -25,7 +25,7 @@
   :style {:width "140px"})
 
 (defelement -body-wrap
-  :class [:p3 :fs1 :bg-neutral-9])
+  :class [:p3 :fs2 :bg-neutral-9])
 
 (defelement -forms-wrap)
 
@@ -88,7 +88,7 @@
      [:div.center.pb3
       [:span.c-neutral-2 "Enter your email to sign up or sign in"]
       [:br]
-      [:i.c-neutral-5.fs0 "(We'll send you the login link via email)"]]
+      [:i.c-neutral-5.fs1 "(We'll send you the login link via email)"]]
      [-forms-wrap
       [render-request-login-code-form ctx]
       [render-login-with-code-form ctx]]]]])

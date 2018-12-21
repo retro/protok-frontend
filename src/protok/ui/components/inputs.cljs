@@ -8,8 +8,8 @@
             [keechma.toolbox.util :refer [class-names]]))
 
 (def text-inputs-class
-  [:block :fs1 :w100p :rounded :bd-neutral-7 :bw1 :c-neutral-2])
-(def text-inputs-style
+  [:block :fs2 :w100p :rounded :bd-neutral-7 :bw1 :c-neutral-2])
+(def text-inputs-styles
   [{:padding "5px 9px"
     :box-shadow "0px 1px 0px white, 0px 2px 5px rgba(0,0,0,0.07) inset"
     :outline "none"
@@ -37,16 +37,16 @@
 (defelement -text-input
   :tag :input
   :class text-inputs-class
-  :style text-inputs-style)
+  :style text-inputs-styles)
 
 (defelement -text-area
   :tag :textarea
   :class text-inputs-class
-  :style text-inputs-style)
+  :style text-inputs-styles)
 
 (defelement -label
   :tag :label
-  :class [:block :fs0 :c-neutral-6 :bold]
+  :class [:block :fs1 :c-neutral-6 :bold]
   :style [{:padding-bottom "5px"
            :transition "all 0.15s ease-in-out"}
           [:&.has-errors {:color (colors :red-6)}]])
@@ -56,7 +56,7 @@
 
 (defelement -error-messages-wrap
   :tag :ul
-  :class [:c-red-5 :fs0]
+  :class [:c-red-5 :fs1]
   :style {:padding-top "5px"})
 
 (defn make-input-with-composition-support [tag]

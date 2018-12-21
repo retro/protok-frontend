@@ -23,7 +23,8 @@
 (defkvaccess
   :jwt
   :login-requested-for
-  :initialized?)
+  :initialized?
+  :account-menu-open?)
 
 (defn get-current-account [app-db]
   (edb/get-named-item app-db :account :current))

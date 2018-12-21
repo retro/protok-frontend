@@ -10,7 +10,9 @@
    {:on-start (pipeline! [value app-db]
                 (wait-dataloader-pipeline!)
                 (pp/commit! (db/assoc-initialized? app-db true))
-                (pp/reroute!))}))
+                (pp/reroute!))
+    :on-route-changed (pipeline! [value app-db]
+                        (pp/commit! (db/dissoc-account-menu-open? app-db)))}))
 
 (defn register
   ([] (register {}))

@@ -9,4 +9,5 @@
      (apply getter-fn @app-db-atom args))))
 
 (def subscriptions
-  {:initialized? (as-sub db/get-initialized?)})
+  {:initialized? (as-sub db/get-initialized?)
+   :account-menu-open? (as-sub db/get-account-menu-open?)})

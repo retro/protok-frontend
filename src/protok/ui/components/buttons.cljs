@@ -158,8 +158,8 @@
                                         :pill (:button/pill props')
                                         :rounded (:button/rounded props')
                                         "block w100p" button-fluid
-                                        "size-big fs3" (or (nil? button-size) (= :big button-size))
-                                        "size-small fs1" (= :small button-size)
+                                        "size-big fs4" (or (nil? button-size) (= :big button-size))
+                                        "size-small fs2" (= :small button-size)
                                         (combine-classes default-classes classes) true})))
         [render-icon :left icon-left]
         text
