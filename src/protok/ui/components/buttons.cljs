@@ -6,7 +6,7 @@
             [protok.icons :refer [icon]]))
 
 (def button-classes
-  [:bw2 :center :overflow-hidden :relative])
+  [:bw2 :center :overflow-hidden :relative :text-decoration-none])
 (def button-styles
   [{:cursor "pointer"
     :outline "none"}

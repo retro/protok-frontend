@@ -48,9 +48,10 @@
    {} icons))
 
 (def icons
-  (-> {:email (inline-icon :email)
+  (-> {:email         (inline-icon :email)
        :arrow-forward (inline-icon :arrow-forward)
-       :spinner spinner}
+       :arrow-back    (inline-icon :arrow-back)
+       :spinner       spinner}
        (add-icon-classes)))
 
 (defn icon [i]

@@ -30,3 +30,6 @@
 
 (defn set-current-account [app-db current-account]
   (edb/insert-named-item app-db :account :current current-account))
+
+(defn remove-current-account [app-db]
+  (edb/remove-named-item app-db :account :current))

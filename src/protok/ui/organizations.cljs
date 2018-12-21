@@ -1,8 +1,13 @@
 (ns protok.ui.organizations
-  (:require [keechma.ui-component :as ui]))
+  (:require [keechma.ui-component :as ui]
+            [keechma.toolbox.css.core :refer-macros [defelement]]))
+
+(defelement -wrap)
 
 (defn render [ctx]
-  [:div "ORGANIZATIONS"])
+  [(ui/component ctx :component/layout)
+   [-wrap "ORGANIZATIONS"]])
 
 (def component
-  (ui/constructor {:renderer render}))
+  (ui/constructor {:renderer render
+                   :component-deps [:component/layout]}))
