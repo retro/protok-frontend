@@ -1,4 +1,14 @@
-(defproject sf "0.1.0-SNAPSHOT"
+(def foreign-libs
+  '[{:file     "dist/index.js"
+     :file-min "dist/index.js"
+     :provides ["react"
+                "react-dom"]
+
+     :global-exports {react     React
+                      react-dom ReactDOM}}])
+
+
+(defproject protok "0.1.0-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -8,7 +18,7 @@
 
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.10.339"]
-                 [reagent "0.8.1"]
+                 [reagent "0.8.1" :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]]
                  [keechma "0.3.13" :exclusions [cljsjs/react-with-addons cljsjs/react-dom cljsjs/react-dom-server]]
                  [keechma/toolbox "0.1.20" :exclusions [cljsjs/react-with-addons cljsjs/react-dom cljsjs/react-dom-server]]
                  [org.clojars.mihaelkonjevic/garden-basscss "0.2.2"]
@@ -59,7 +69,10 @@
                     {:devtools/config
                      {:features-to-install    [:formatters :hints]
                       :fn-symbol              "F"
-                      :print-config-overrides true}}}}
+                      :print-config-overrides true}}
+                    :infer-externs true
+                    :npm-deps false
+                    :foreign-libs ~foreign-libs}}
 
     {:id           "min"
      :source-paths ["src"]
@@ -69,14 +82,20 @@
                     :output-dir      "resources/public/js/min"
                     :elide-asserts   true
                     :closure-defines {goog.DEBUG false}
-                    :pretty-print    false}}
+                    :pretty-print    false
+                    :infer-externs true
+                    :npm-deps false
+                    :foreign-libs ~foreign-libs}}
 
     {:id           "test"
      :source-paths ["src" "test"]
      :compiler     {:output-to     "resources/public/js/test.js"
                     :output-dir    "resources/public/js/test"
                     :main          protok.runner
-                    :optimizations :none}}]})
+                    :optimizations :none
+                    :infer-externs true
+                    :npm-deps false
+                    :foreign-libs ~foreign-libs}}]})
 
 
 

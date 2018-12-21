@@ -1,0 +1,14 @@
+{
+  "name": "protok-frontend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:retro/protok-frontend.git",
+  "author": "Mihael Konjevic <konjevic@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@cljs-oss/module-deps": "^1.1.1",
+    "parcel-bundler": "^1.11.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0"
+  }
+}
