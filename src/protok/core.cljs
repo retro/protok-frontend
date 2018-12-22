@@ -19,8 +19,10 @@
        :controllers   controllers
        :subscriptions subscriptions
        :html-element  (.getElementById js/document "app")
-       :routes [["" {:page "organizations"}]
-                ":page"]
+       :routes [["" {:page "organizations" :subpage "index"}]
+                [":page" {:subpage "index"}]
+                ":page/:subpage"
+                ":page/:subpage/:id"]
        :route-processor route/processor}
       (dataloader/install datasources edb-schema)
       (forms/install protok-forms/forms protok-forms/forms-automount-fns)

@@ -51,6 +51,8 @@
   (-> {:email         (inline-icon :email)
        :arrow-forward (inline-icon :arrow-forward)
        :arrow-back    (inline-icon :arrow-back)
+       :group         (inline-icon :group)
+       :add           (inline-icon :add)
        :spinner       spinner}
        (add-icon-classes)))
 

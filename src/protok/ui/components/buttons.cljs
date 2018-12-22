@@ -66,7 +66,7 @@
       :transform "scale(0.99)"}]
     [:.protok_ui_components_buttons--icon-wrap
      {:width "36px"
-      :top "5px"
+      :top "4px"
       :position "relative"}
      [:&.icon-wrap-left
       {:margin-left "-16px"}]
@@ -85,7 +85,7 @@
     [:.protok_ui_components_buttons--icon-wrap
      {:position :relative
       :width "28px"
-      :top "4px"}
+      :top "3px"}
      [:&.icon-wrap-left
       {:margin-left "-14px"}
       [:.icon-email {:position "relative"

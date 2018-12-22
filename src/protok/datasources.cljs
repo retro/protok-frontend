@@ -23,6 +23,23 @@
                {:query [:current-account :currentAccount]
                 :token jwt}))})
 
+(def organizations
+  {:target [:edb/collection :organizations/list]
+   :deps [:jwt]
+   :loader gql/loader
+   :processor (fn [data]
+                (map
+                 (fn [o]
+                   (-> (:organization o)
+                       (assoc :account/role (:member-role o))))
+                 data))
+   :params (fn [_ _ {:keys [jwt]}]
+             (when jwt
+               {:query [:organization-memberships
+                        [:currentAccount :organizationMemberships]]
+                :token jwt}))})
+
 (def datasources
-  {:jwt jwt
-   :current-account current-account})
+  {:jwt             jwt
+   :current-account current-account
+   :organizations   organizations})

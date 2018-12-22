@@ -22,3 +22,16 @@ fragment accountData on Account {
   username
   email
 }
+
+
+query OrganizationMemberships {
+  currentAccount {
+    organizationMemberships {
+      memberRole
+      organization {
+        id
+        name
+      }
+    }
+  }
+}
