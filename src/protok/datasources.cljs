@@ -2,7 +2,8 @@
   (:require [protok.settings :refer [jwt-ls-name]]
             [protok.util.local-storage :refer [ls-get]]
             [keechma.toolbox.dataloader.subscriptions :refer [map-loader]]
-            [protok.gql :as gql]))
+            [protok.gql :as gql]
+            [protok.domain.gql :refer [process-account-role]]))
 
 (def ignore-datasource!
   :keechma.toolbox.dataloader.core/ignore)
@@ -24,15 +25,16 @@
                 :token jwt}))})
 
 (def organizations
-  {:target [:edb/collection :organizations/list]
+  {:target [:edb/collection :organization/list]
    :deps [:jwt]
    :loader gql/loader
    :processor (fn [data]
-                (map
-                 (fn [o]
-                   (-> (:organization o)
-                       (assoc :account/role (:member-role o))))
-                 data))
+                (-> (mapv
+                     (fn [o]
+                       (-> (:organization o)
+                           (assoc :account/role (:memberRole o))))
+                     data)
+                    process-account-role))
    :params (fn [_ _ {:keys [jwt]}]
              (when jwt
                {:query [:organization-memberships

@@ -28,7 +28,8 @@
                  [clj-tagsoup "0.3.0" :exclusions [org.clojure/clojure org.clojure/data.xml]]
                  [org.clojure/data.xml "0.0.8"]
                  [floatingpointio/graphql-builder "0.1.8"]
-                 [hodgepodge "0.1.3"]]
+                 [hodgepodge "0.1.3"]
+                 [org.clojure/core.match "0.3.0-alpha5"]]
 
 
   :source-paths ["src" "test"]

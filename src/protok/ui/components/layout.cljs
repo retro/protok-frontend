@@ -100,14 +100,14 @@
 
 (defelement -logo-wrap
   :style {:width "32px"
-          :padding-right "7px"}
-  :class [])
+          :padding-right "7px"})
 
 
 (defn render-header [ctx]
   [-header
    [-logo-wrap
-    [logo-picto]]
+    [:a {:href (ui/url ctx {:page "organizations"})}
+     [logo-picto]]]
    [render-account-menu ctx]])
 
 (defn get-props [children]

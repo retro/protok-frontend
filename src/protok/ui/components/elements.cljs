@@ -13,4 +13,4 @@
            :text-shadow "0px 1px 0 rgba(255,255,255,0.7)"}])
 
 (defelement -content-wrap
-  :class [:bg-white :rounded :sh1 :p2])
+  :class [:bg-white :rounded :sh1 :overflow-hidden])

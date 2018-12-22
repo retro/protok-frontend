@@ -7,7 +7,10 @@
             [keechma.toolbox.forms.helpers :as forms-helpers]
             [keechma.toolbox.forms.core :as forms-core]
             [keechma.toolbox.forms.ui :as forms-ui]
-            [protok.ui.components.buttons :as buttons]))
+            [protok.ui.components.buttons :as buttons]
+            [protok.domain.form-ids :as form-ids]
+            [keechma.toolbox.ui :refer [route>]]
+            [protok.ui.shared :refer [<submit-exclusive]]))
 
 (defelement -wrap
   :class [:flex :w100vw :h100vh :items-center :justify-center])
@@ -29,14 +32,8 @@
 
 (defelement -forms-wrap)
 
-(defn <submit-exclusive [ctx form-props ev]
-  (let [state (get-in (forms-ui/form-state> ctx form-props) [:state :Type])]
-    (if (not= :submitting state)
-      (forms-ui/<submit ctx form-props ev)
-      (.preventDefault ev))))
-
 (defn render-request-login-code-form [ctx]
-  (let [form-props [:request-login-code :form]
+  (let [form-props [:request-login-code (form-ids/request-login-code (route> ctx))]
         form-state (forms-ui/form-state> ctx form-props)
         state (get-in form-state [:state :type])
         submitting? (= :submitting state)]

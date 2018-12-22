@@ -25,7 +25,7 @@
         processed-route-data (process-route-data route-data app-db)]
     (log-route route-data processed-route-data)
     (if (not= route-data processed-route-data)
-      (assoc route
-             :data processed-route-data
-             :original-data route-data)
-      route)))
+        (assoc route
+               :data processed-route-data
+               :original-data route-data)
+        route)))

@@ -12,7 +12,8 @@
             [protok.styles :refer [stylesheet]]
             [keechma.toolbox.entangled.app :as entangled]
             [keechma.toolbox.css.app :as css]
-            [protok.domain.route :as route]))
+            [protok.domain.route :as route]
+            [protok.util.forms :refer [auto-mount-fns forms]]))
 
 (def app-definition
   (-> {:components    ui
@@ -25,7 +26,7 @@
                 ":page/:subpage/:id"]
        :route-processor route/processor}
       (dataloader/install datasources edb-schema)
-      (forms/install protok-forms/forms protok-forms/forms-automount-fns)
+      (forms/install (forms protok-forms/forms) (auto-mount-fns protok-forms/forms))
       (css/install (stylesheet))
       (entangled/install)))
 

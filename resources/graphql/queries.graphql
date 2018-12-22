@@ -35,3 +35,23 @@ query OrganizationMemberships {
     }
   }
 }
+
+mutation CreateOrganization($organization: CreateOrganizationInput!) {
+  createOrganization(organization:$organization) {
+   ...organizationMutationData
+  }
+}
+
+mutation UpdateOrganization($organization: UpdateOrganizationInput!) {
+  updateOrganization(organization:$organization) {
+    ...organizationMutationData
+  }
+}
+
+fragment organizationMutationData on Organization {
+  id
+  name
+  membership {
+    memberRole
+  }
+}

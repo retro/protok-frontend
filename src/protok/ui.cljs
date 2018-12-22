@@ -4,6 +4,7 @@
             [protok.ui.login :as login]
             [protok.ui.organizations :as organizations]
             [protok.ui.organizations.list :as organizations-list]
+            [protok.ui.organizations.form :as organizations-form]
             [protok.ui.loading :as loading]
             [protok.ui.components.layout :as layout]))
 
@@ -13,5 +14,6 @@
    :login              login/component
    :organizations      organizations/component
    :organizations/list organizations-list/component
+   :organizations/form organizations-form/component
    :loading            loading/component
    :component/layout   layout/component})
