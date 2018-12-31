@@ -14,3 +14,9 @@
 
 (defelement -content-wrap
   :class [:bg-white :rounded :sh1 :overflow-hidden])
+
+(defelement -breadcrumbs-wrap
+  :tag :ul
+  :class [:mt3]
+  :style [[:li {:display "inline-block"
+                :margin-right "10px"}]])

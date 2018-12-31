@@ -14,4 +14,20 @@
           :else nil))
       (on-page "organizations")))
 
+(def project
+  (-> (fn [route _]
+        (match [route]
+          [{:subpage "new"}] :new
+          [{:subpage "edit" :id id}] id
+          :else nil))
+      (on-page "projects")))
+
+(def flow
+  (-> (fn [route _]
+        (match [route]
+          [{:subpage "new"}] :new
+          [{:subpage "edit" :id id}] id
+          :else nil))
+      (on-page "flows")))
+
 (def request-login-code #(when (= "login" (:page %)) :form))

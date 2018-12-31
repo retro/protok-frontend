@@ -11,8 +11,16 @@
        value))
    data))
 
-(defn mutate-organization-processor [organization]
-  (-> organization
-      (dissoc :membership)
-      (assoc :account/role (get-in organization [:membership :memberRole]))
-      process-account-role))
+(defn organization-processor [organization]
+  (when organization
+    (-> organization
+        (dissoc :membership)
+        (assoc :account/role (get-in organization [:membership :memberRole]))
+        process-account-role)))
+
+(defn organization-membership->organization [membership]
+  (when membership
+    (let [organization (:organization membership)] 
+      (-> organization
+          (assoc :account/role (:memberRole membership))
+          process-account-role))))

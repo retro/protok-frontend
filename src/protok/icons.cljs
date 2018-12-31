@@ -53,6 +53,8 @@
        :arrow-back    (inline-icon :arrow-back)
        :group         (inline-icon :group)
        :add           (inline-icon :add)
+       :view-list     (inline-icon :view-list)
+       :waves         (inline-icon :waves)
        :spinner       spinner}
        (add-icon-classes)))
 

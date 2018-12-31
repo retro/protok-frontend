@@ -1,52 +1,121 @@
 (ns protok.ui.main
   (:require [keechma.ui-component :as ui]
             [keechma.toolbox.ui :refer [sub> <cmd route>]]
-            [protok.svgs :refer [logo-picto]]
-            [keechma.toolbox.css.core :refer-macros [defelement]]
-            [protok.ui.components.buttons :as button]
-            [oops.core :refer [ocall]]))
+            [clojure.core.match :refer-macros [match]]))
 
-(defelement -not-found-wrap
-  :class [:h100vh :w100vw :flex :items-center :justify-center])
+(defn path-current-organization [ctx]
+  (let [current-organization (sub> ctx :current-organization)]
+    {:label (:name current-organization)
+     :url {:page "organizations" :subpage "view" :id (:id current-organization)}}))
 
-(defelement -not-found-inner-wrap
-  :class [:rounded :bg-white :sh1 :flex :flex-column :items-center :justify-center :p3]
-  :style {:width "300px"})
+(defn path-current-project [ctx]
+  (let [current-project (sub> ctx :current-project)]
+    {:label (:name current-project)
+     :url {:page "projects" :subpage "view" :id (:id current-project)}}))
 
-(defelement -not-found-logo-wrap
-  :style {:width "30px"})
+(defn path-current-flow [ctx]
+  (let [current-flow (sub> ctx :current-flow)]
+    {:label (:name current-flow)
+     :url {:page "flows" :subpage "view" :id (:id current-flow)}}))
 
-(defelement -not-found-copy
-  :class [:py2 :c-neutral-4 :fs1 :center])
+(defn realize-page-path [ctx path]
+  (let [realized 
+        (map
+         (fn [p]
+           (cond
+             (fn? p) (p ctx)
+             (string? p) {:label p}
+             :else p))
+         path)]
+    (concat [{:label "Home" :url {:page "organizations" :subpage "index"}}] (doall realized))))
 
-(defn render-404 []
-  [-not-found-wrap
-   [-not-found-inner-wrap
-    [-not-found-logo-wrap
-     [logo-picto]]
-    [-not-found-copy
-     "We couldn't find the page"
-     [:br]
-     "you're looking for."]
-    [button/secondary-small
-     {:button/pill true
-      :icon/left :arrow-back
-      :on-click #(ocall js/window :history.back)}
-     "Go Back"]]])
+(def default-page-config
+  {:loading? (constantly false)})
+
+(defn wrap-bare-layout [ctx props]
+  [(ui/component ctx :component/layout) (:content props)])
+
+(defn wrap-content-layout [ctx props]
+  [(ui/component ctx :component/content-layout) props])
+
+(defn render-page [ctx {:keys [component path] :as page-props}]
+  (if (keyword? component)
+    (let [renderer (ui/component ctx component)
+          renderer-meta (meta renderer)
+          renderer-context (:keechma.ui-component/context renderer-meta)
+          {:keys [layout loading?]} (merge default-page-config (:protok/config renderer-context))
+          props (merge
+                 page-props
+                 {:loading? loading?
+                  :content [renderer]
+                  :path (realize-page-path ctx (or path []))})]
+      (case layout
+        :bare [wrap-bare-layout ctx props]
+        :content [wrap-content-layout ctx props]
+        [renderer]))
+    component))
+
+(defn get-page [ctx]
+  (let [route (route> ctx)]
+    (match [route]
+      [{:page "loading"}] :loading
+      [{:page "login"}]   :login
+
+      [{:page "organizations" :subpage "index"}]      
+      {:component :organizations/list}
+
+      [{:page "organizations" :subpage "new"}]        
+      {:component :organizations/form
+       :path      ["New Organization"]}
+
+      [{:page "organizations" :subpage "edit" :id _}] 
+      {:component :organizations/form
+       :path      [path-current-organization "Edit Organization"]}
+
+      [{:page "organizations" :subpage "view" :id _}] 
+      {:component :projects/list
+       :path      [path-current-organization "Projects"]}
+
+      [{:page "projects" :subpage "new"}]             
+      {:component :projects/form
+       :path      [path-current-organization "New Project"]}
+
+      [{:page "projects" :subpage "edit" :id _}]      
+      {:component :projects/form
+       :path      [path-current-organization path-current-project "Edit Project"]}
+
+      [{:page "projects" :subpage "view" :id _}]      
+      {:component :flows/list
+       :path      [path-current-organization path-current-project "Flows"]}
+
+      [{:page "flows" :subpage "new"}]                
+      {:component :flows/form
+       :path      [path-current-organization path-current-project "New Flow"]}
+      
+      [{:page "flows" :subpage "edit" :id _}]         
+      {:component :flows/form
+       :path      [path-current-organization path-current-project path-current-flow "Edit Flow"]}
+      
+      :else :not-found)))
 
 (defn render [ctx]
-  (let [page (:page (route> ctx))]
-    [:div
-     (case page
-       "loading" [(ui/component ctx :loading)]
-       "login" [(ui/component ctx :login)]
-       "organizations" [(ui/component ctx :organizations)]
-       
-       [render-404])]))
+  (let [page (get-page ctx)]
+    [render-page ctx (if (map? page) page {:component page})]))
 
 (def component
   (ui/constructor
    {:renderer render
+    :subscription-deps [:current-organization
+                        :current-project
+                        :current-flow]
     :component-deps [:loading
                      :login
-                     :organizations]}))
+                     :not-found
+                     :organizations/list
+                     :organizations/form
+                     :projects/list
+                     :projects/form
+                     :flows/list
+                     :flows/form
+                     :component/layout
+                     :component/content-layout]}))

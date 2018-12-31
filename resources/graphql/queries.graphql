@@ -36,22 +36,97 @@ query OrganizationMemberships {
   }
 }
 
-mutation CreateOrganization($organization: CreateOrganizationInput!) {
-  createOrganization(organization:$organization) {
-   ...organizationMutationData
+mutation CreateOrganization($input: CreateOrganizationInput!) {
+  createOrganization(input:$input) {
+   ...organizationData
   }
 }
 
-mutation UpdateOrganization($organization: UpdateOrganizationInput!) {
-  updateOrganization(organization:$organization) {
-    ...organizationMutationData
+mutation UpdateOrganization($input: UpdateOrganizationInput!) {
+  updateOrganization(input:$input) {
+    ...organizationData
   }
 }
 
-fragment organizationMutationData on Organization {
+query FetchOrganization($id: ID!) {
+  fetchOrganization(id:$id) {
+    ...organizationData
+  }
+}
+
+fragment organizationData on Organization {
   id
   name
   membership {
     memberRole
   }
 }
+
+query FetchOrganizationProjects($id: ID!) {
+  fetchOrganization(id: $id) {
+    projects {
+      ...projectData
+    }
+  }
+}
+
+query FetchProject($id:ID!) {
+  fetchProject(id: $id) {
+    ...projectData
+  }
+}
+
+mutation CreateProject($input: CreateProjectInput!) {
+  createProject(input:$input) {
+   ...projectData
+  }
+}
+
+mutation UpdateProject($input: UpdateProjectInput!) {
+  updateProject(input:$input) {
+    ...projectData
+  }
+}
+
+fragment projectData on Project {
+  id
+  name
+  organization {
+    id
+  }
+}
+
+query FetchProjectFlows($id:ID!) {
+  fetchProject(id:$id) {
+    flows {
+      ...flowData
+    }
+  }
+}
+
+query FetchFlow($id:ID!) {
+  fetchFlow(id: $id) {
+    ...flowData
+  }
+}
+
+mutation CreateFlow($input: CreateFlowInput!) {
+  createFlow(input:$input) {
+   ...flowData
+  }
+}
+
+mutation UpdateFlow($input: UpdateFlowInput!) {
+  updateFlow(input:$input) {
+    ...flowData
+  }
+}
+
+fragment flowData on Flow {
+  id
+  name
+  project {
+    id
+  }
+}
+

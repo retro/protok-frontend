@@ -100,7 +100,7 @@
                            (get-in res (flatten [extract-path]))
                            res))))))
        (do
-         (l/group "Missing Graphql Quert")
+         (l/group "Missing Graphql Query")
          (l/warn "Couldn't find GraphQL query named" (str query-name " (" query-type "). Available queries:"))
          (l/pp (keys (q-map query-type)))
          (l/group-end)))
