@@ -82,15 +82,19 @@
 
 (def flows
   {:target [:edb/collection :flow/list]
-   :deps [:jwt]
+   :deps [:jwt :current-project]
    :loader gql/loader
-   :params (fn [_ {:keys [page subpage id]} {:keys [jwt]}]
-             (when (and (= "projects" page) (= "view" subpage)
-                        id jwt)
-               {:query [:fetch-project-flows 
-                        [:fetchProject :flows]]
-                :variables {:id id}
-                :token jwt}))})
+   :params (fn [_ {:keys [page subpage id project-id]} {:keys [jwt current-project]}]
+             (let [project-id
+                   (cond
+                     (and (= "projects" page) (= "view" subpage) id) id
+                     current-project (:id current-project)
+                     :else project-id)]
+               (when (and project-id jwt)
+                 {:query [:fetch-project-flows 
+                          [:fetchProject :flows]]
+                  :variables {:id project-id}
+                  :token jwt})))})
 
 (def current-flow
   {:target [:edb/named-item :flow/current]

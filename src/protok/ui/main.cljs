@@ -7,17 +7,17 @@
   {:loading? (constantly false)})
 
 (defn path-current-organization [ctx]
-  (let [current-organization (sub> ctx :current-organization)]
+  (when-let [current-organization (sub> ctx :current-organization)]
     {:label (:name current-organization)
      :url {:page "organizations" :subpage "view" :id (:id current-organization)}}))
 
 (defn path-current-project [ctx]
-  (let [current-project (sub> ctx :current-project)]
+  (when-let [current-project (sub> ctx :current-project)]
     {:label (:name current-project)
      :url {:page "projects" :subpage "view" :id (:id current-project)}}))
 
 (defn path-current-flow [ctx]
-  (let [current-flow (sub> ctx :current-flow)]
+  (when-let [current-flow (sub> ctx :current-flow)]
     {:label (:name current-flow)
      :url {:page "flows" :subpage "view" :id (:id current-flow)}}))
 
@@ -29,11 +29,17 @@
              (fn? p) (p ctx)
              (string? p) {:label p}
              :else p))
-         path)]
-    (concat [{:label "Home" :url {:page "organizations" :subpage "index"}}] (doall realized))))
+         path)
+        full (concat [{:label "Organizations" 
+                       :url {:page "organizations" :subpage "index"}}]
+                     (doall realized))]
+    (when-not (some nil? full)
+      full)))
 
 (defn wrap-bare-layout [ctx props]
-  [(ui/component ctx :component/layout) (:content props)])
+  [(ui/component ctx :component/layout)
+   {:layout/path (:path props)} 
+   (:content props)])
 
 (defn wrap-content-layout [ctx props]
   [(ui/component ctx :component/content-layout) props])
@@ -93,8 +99,8 @@
        :path      [path-current-organization path-current-project "New Flow"]}
       
       [{:page "flows" :subpage "edit" :id _}]         
-      {:component :flows/form
-       :path      [path-current-organization path-current-project path-current-flow "Edit Flow"]}
+      {:component :flows/editor
+       :path      [path-current-organization path-current-project path-current-flow]}
       
       :else :not-found)))
 
@@ -117,5 +123,6 @@
                      :projects/form
                      :flows/list
                      :flows/form
+                     :flows/editor
                      :component/layout
                      :component/content-layout]}))

@@ -9,6 +9,7 @@
             [protok.ui.projects.form :as projects-form]
             [protok.ui.flows.list :as flows-list]
             [protok.ui.flows.form :as flows-form]
+            [protok.ui.flows.editor :as flows-editor]
             [protok.ui.loading :as loading]
             [protok.ui.components.layout :as layout]
             [protok.ui.components.content-layout :as content-layout]))
@@ -25,5 +26,6 @@
    :projects/form            projects-form/component
    :flows/list               flows-list/component
    :flows/form               flows-form/component
+   :flows/editor             flows-editor/component
    :component/layout         layout/component
    :component/content-layout content-layout/component})

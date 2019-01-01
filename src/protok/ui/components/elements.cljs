@@ -4,6 +4,7 @@
 
 (defelement -layout
   :style [{:max-width "960px"
+           :width "100%"
            :margin "0 auto"}])
 
 (defelement -page-title

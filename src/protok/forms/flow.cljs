@@ -35,7 +35,7 @@
     (if (= :new id)
       (pp/commit! (edb/prepend-collection app-db :flow :list [data]))
       (pp/commit! (edb/insert-item app-db :flow data)))
-    (pp/redirect! {:page "flows" :subpage "view" :id (:id data)})))
+    (pp/redirect! {:page "flows" :subpage "edit" :id (:id data)})))
 
 (defn constructor []
   (->Form (v/to-validator {:name [:not-empty]})))
