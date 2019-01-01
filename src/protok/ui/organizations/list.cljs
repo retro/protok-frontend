@@ -3,7 +3,8 @@
             [protok.ui.components.empty-state :as empty-state]
             [protok.ui.components.buttons :as button]
             [protok.ui.components.data-table :as data-table]
-            [keechma.toolbox.ui :refer [sub>]]))
+            [keechma.toolbox.ui :refer [sub>]]
+            [protok.ui.shared :refer [datasources-pending?>]]))
 
 (defn render-empty-state [ctx]
   [empty-state/render 
@@ -53,6 +54,8 @@
          "Create a new organization"]]])))
 
 (def component
-  (-> (ui/constructor {:renderer render
-                       :subscription-deps [:organizations]})
-      (assoc :protok/config {:layout :content})))
+  (-> (ui/constructor 
+       {:renderer render
+        :subscription-deps [:organizations]})
+      (assoc :protok/config {:layout :content
+                             :loading? #(datasources-pending?> % :organizations)})))

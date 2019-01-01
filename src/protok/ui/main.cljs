@@ -3,6 +3,9 @@
             [keechma.toolbox.ui :refer [sub> <cmd route>]]
             [clojure.core.match :refer-macros [match]]))
 
+(def default-page-config
+  {:loading? (constantly false)})
+
 (defn path-current-organization [ctx]
   (let [current-organization (sub> ctx :current-organization)]
     {:label (:name current-organization)
@@ -29,9 +32,6 @@
          path)]
     (concat [{:label "Home" :url {:page "organizations" :subpage "index"}}] (doall realized))))
 
-(def default-page-config
-  {:loading? (constantly false)})
-
 (defn wrap-bare-layout [ctx props]
   [(ui/component ctx :component/layout) (:content props)])
 
@@ -46,7 +46,7 @@
           {:keys [layout loading?]} (merge default-page-config (:protok/config renderer-context))
           props (merge
                  page-props
-                 {:loading? loading?
+                 {:loading?  (partial loading? renderer-context)
                   :content [renderer]
                   :path (realize-page-path ctx (or path []))})]
       (case layout

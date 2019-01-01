@@ -55,6 +55,7 @@
        :add           (inline-icon :add)
        :view-list     (inline-icon :view-list)
        :waves         (inline-icon :waves)
+       :chevron-right (inline-icon :chevron-right)
        :spinner       spinner}
        (add-icon-classes)))
 

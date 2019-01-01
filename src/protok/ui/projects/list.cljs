@@ -3,7 +3,8 @@
             [protok.ui.components.empty-state :as empty-state]
             [protok.ui.components.buttons :as button]
             [protok.ui.components.data-table :as data-table]
-            [keechma.toolbox.ui :refer [sub> route>]]))
+            [keechma.toolbox.ui :refer [sub> route>]]
+            [protok.ui.shared :refer [datasources-pending?>]]))
 
 (defn render-empty-state [ctx]
   (let [id (:id (route> ctx))]
@@ -57,4 +58,5 @@
 (def component
   (-> (ui/constructor {:renderer render
                        :subscription-deps [:projects]})
-      (assoc :protok/config {:layout :content})))
+      (assoc :protok/config {:layout :content
+                             :loading? #(datasources-pending?> % :projects)})))

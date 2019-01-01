@@ -1,7 +1,8 @@
 (ns protok.ui.components.content-layout
   (:require [keechma.ui-component :as ui]
             [protok.ui.components.elements :as e]
-            [protok.ui.shared :refer [datasources-pending?>]]))
+            [protok.ui.shared :refer [datasources-pending?>]]
+            [protok.icons :refer [icon]]))
 
 (defn render-path-part [ctx {:keys [label url]}]
   (if url
@@ -18,7 +19,8 @@
 
 (defn render [ctx {:keys [content path] :as props}]
   (let [breadcrumbs (butlast path)
-        title (last path)]
+        title (last path)
+        last-breadcrumb? (fn [idx] (= idx (dec (count breadcrumbs))))]
     [(ui/component ctx :component/layout)
      [e/-layout 
       (if (loading? ctx (:loading? props))
@@ -29,7 +31,10 @@
            (fn [idx p]
              ^{:key idx}
              [:li
-              [render-path-part ctx p]])
+              [render-path-part ctx p]
+              (when-not (last-breadcrumb? idx)
+                [:div.chevron.inline-block
+                 (icon :chevron-right)])])
            breadcrumbs)]
          [e/-page-title [render-path-part ctx title]]
          [e/-content-wrap
