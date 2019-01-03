@@ -12,3 +12,6 @@
 
 (defn get-name [ctx]
   (get-in ctx [:keechma.toolbox.entangled/component :component-name]))
+
+(defn get-state-app-db-path [ctx]
+  (vec (conj (get-app-db-path ctx) :state)))

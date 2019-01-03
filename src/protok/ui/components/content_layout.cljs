@@ -33,7 +33,7 @@
              [:li
               [render-path-part ctx p]
               (when-not (last-breadcrumb? idx)
-                [:div.chevron.inline-block
+                [:div.chevron
                  (icon :chevron-right)])])
            breadcrumbs)]
          [e/-page-title [render-path-part ctx title]]

@@ -1,7 +1,13 @@
 (ns keechma.toolbox.entangled.app
   (:require [keechma.toolbox.entangled.shared :refer [id]]
-            [keechma.toolbox.entangled.controller :as controller])
+            [keechma.toolbox.entangled.controller :as controller]
+            [clojure.string :as str])
   (:require-macros [reagent.ratom :refer [reaction]]))
+
+(defn convert-namespaced-key [k]
+  (if-let [k-ns (namespace k)]
+    (str (str/replace k-ns "." "_") "__" (name k))
+    k))
 
 (defn component-state-sub [app-db-atom component-name component-id]
   (reaction
@@ -21,7 +27,7 @@
   (let [cs (reduce-kv
             (fn [acc k c]
               (if (get c id)
-                (let [ent-name (keyword :keechma.toolbox.entangled.component k)]
+                (let [ent-name (keyword :keechma.toolbox.entangled.component (convert-namespaced-key k))]
                   (assoc-in acc [k :keechma.toolbox.entangled/name] ent-name))
                 acc))
             (:components app-config) (:components app-config))]

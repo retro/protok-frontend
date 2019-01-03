@@ -62,8 +62,7 @@
      :height "44px"
      :line-height "40px"}
     [:&:focus:active
-     {:top "1px"
-      :transform "scale(0.99)"}]
+     {:transform "scale(0.99)"}]
     [:.protok_ui_components_buttons--icon-wrap
      {:width "36px"
       :top "4px"
@@ -80,8 +79,7 @@
      :height "32px"
      :line-height "28px"}
     [:&:focus:active
-     {:top "1px"
-      :transform "scale(0.99)"}]
+     {:transform "scale(0.99)"}]
     [:.protok_ui_components_buttons--icon-wrap
      {:position :relative
       :width "28px"

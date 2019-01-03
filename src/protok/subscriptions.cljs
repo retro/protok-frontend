@@ -9,5 +9,8 @@
      (apply getter-fn @app-db-atom args))))
 
 (def subscriptions
-  {:initialized? (as-sub db/get-initialized?)
-   :account-menu-open? (as-sub db/get-account-menu-open?)})
+  {:initialized?                (as-sub db/get-initialized?)
+   :account-menu-open?          (as-sub db/get-account-menu-open?)
+   :current-flow-node           (as-sub db/get-current-flow-node)
+   :current-flow-node-form-type (as-sub db/get-current-flow-node-form-type)
+   :current-flow-nodes          (as-sub db/get-current-flow-nodes)})

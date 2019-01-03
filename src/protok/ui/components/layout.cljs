@@ -134,9 +134,10 @@
         breadcrumbs)])))
 
 (defelement -header
-  :class [:fixed :w100vw :top-0 :left-0 :flex :px2 :flex-row :items-center :justify-between]
+  :class [:fixed :w100vw :top-0 :left-0 :flex :px2 :flex-row :items-center :justify-between :relative]
   :style {:height header-height
-          :background "rgba(255,255,255,0.5)"})
+          :background "rgba(255,255,255,0.5)"
+          :z-index 10})
 
 (defelement -logo-wrap
   :style {:width "32px"
@@ -165,8 +166,9 @@
            :min-width "100vw"}])
 
 (defelement -inner-wrap
+  :class [:relative]
   :style [[:&.below-header
-           {:padding-top header-height
+           {:margin-top header-height
             :flex-grow "1"}]])
 
 (defn render [ctx & children]

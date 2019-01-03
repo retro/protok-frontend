@@ -10,6 +10,7 @@
             [protok.ui.flows.list :as flows-list]
             [protok.ui.flows.form :as flows-form]
             [protok.ui.flows.editor :as flows-editor]
+            [protok.ui.flows.editor.node-form :as flows-editor-node-form]
             [protok.ui.loading :as loading]
             [protok.ui.components.layout :as layout]
             [protok.ui.components.content-layout :as content-layout]))
@@ -27,5 +28,6 @@
    :flows/list               flows-list/component
    :flows/form               flows-form/component
    :flows/editor             flows-editor/component
+   :flows/node-form          flows-editor-node-form/component
    :component/layout         layout/component
    :component/content-layout content-layout/component})

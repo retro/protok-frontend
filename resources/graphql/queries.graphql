@@ -38,7 +38,7 @@ query OrganizationMemberships {
 
 mutation CreateOrganization($input: CreateOrganizationInput!) {
   createOrganization(input:$input) {
-   ...organizationData
+    ...organizationData
   }
 }
 
@@ -78,7 +78,7 @@ query FetchProject($id:ID!) {
 
 mutation CreateProject($input: CreateProjectInput!) {
   createProject(input:$input) {
-   ...projectData
+    ...projectData
   }
 }
 
@@ -106,26 +106,198 @@ query FetchProjectFlows($id:ID!) {
 
 query FetchFlow($id:ID!) {
   fetchFlow(id: $id) {
-    ...flowData
+    ...fullFlowData
   }
 }
 
 mutation CreateFlow($input: CreateFlowInput!) {
   createFlow(input:$input) {
-   ...flowData
+    ...flowData
   }
 }
 
 mutation UpdateFlow($input: UpdateFlowInput!) {
   updateFlow(input:$input) {
-    ...flowData
+    ...fullFlowData
   }
 }
+
+mutation CreateFlowScreen($input:CreateFlowScreenInput!) {
+  createFlowScreen(input:$input){
+    ...flowScreenData
+  }
+}
+
+
+mutation CreateFlowEvent($input:CreateFlowEventInput!) {
+  createFlowEvent(input:$input){
+    ...flowEventData
+  }
+}
+
+
+mutation CreateFlowSwitch($input:CreateFlowSwitchInput!) {
+  createFlowSwitch(input:$input){
+    ...flowSwitchData
+  }
+}
+
+
+mutation CreateFlowFlowRef($input:CreateFlowFlowRefInput!) {
+  createFlowFlowRef(input:$input){
+    ...flowFlowRefData
+  }
+}
+
+mutation CreateFlowScreenHotspot($input:CreateFlowScreenHotspotInput!) {
+  createFlowScreenHotspot(input:$input){
+    ...flowScreenHotspotData
+  }
+}
+
+mutation CreateFlowSwitchOption($input:CreateFlowSwitchOptionInput!) {
+  createFlowSwitchOption(input:$input){
+    ...flowSwitchOptionData
+  }
+}
+
+mutation UpdateFlowScreen($input:UpdateFlowScreenInput!) {
+  updateFlowScreen(input:$input){
+    ...flowScreenData
+  }
+}
+
+
+mutation UpdateFlowEvent($input:UpdateFlowEventInput!) {
+  updateFlowEvent(input:$input){
+    ...flowEventData
+  }
+}
+
+
+mutation UpdateFlowSwitch($input:UpdateFlowSwitchInput!) {
+  updateFlowSwitch(input:$input){
+    ...flowSwitchData
+  }
+}
+
+
+mutation UpdateFlowFlowRef($input:UpdateFlowFlowRefInput!) {
+  updateFlowFlowRef(input:$input){
+    ...flowFlowRefData
+  }
+}
+
+mutation UpdateFlowScreenHotspot($input:UpdateFlowScreenHotspotInput!) {
+  updateFlowScreenHotspot(input:$input){
+    ...flowScreenHotspotData
+  }
+}
+
+mutation UpdateFlowSwitchOption($input:UpdateFlowSwitchOptionInput!) {
+  updateFlowSwitchOption(input:$input){
+    ...flowSwitchOptionData
+  }
+}
+
 
 fragment flowData on Flow {
   id
   name
   project {
+    id
+  }
+}
+
+fragment fullFlowData on Flow {
+  ...flowData
+  flowNodes {
+    ...flowNodeData
+  }
+}
+
+fragment flowNodeData on FlowNode {
+  id
+  ... on FlowSwitch {
+    ...flowSwitchData
+  }
+  ... on FlowFlowRef {
+    ...flowFlowRefData
+  }
+  ... on FlowScreen {
+    ...flowScreenData
+  }
+  ... on FlowEvent {
+    ...flowEventData
+  }
+}
+
+fragment flowSwitchData on FlowSwitch {
+  id
+  type
+  isEntrypoint
+  name
+  description
+  options {
+    ...flowSwitchOptionData
+  }
+}
+
+fragment flowSwitchOptionData on FlowSwitchOption {
+  id
+  name
+  description
+  targetFlowNode {
+    id
+  }
+}
+
+fragment flowScreenData on FlowScreen {
+  id
+  type
+  isEntrypoint
+  name
+  description
+  hotspots {
+    ...flowScreenHotspotData
+  }
+}
+
+fragment flowScreenHotspotData on FlowScreenHotspot {
+  id
+  name
+  description
+  coordinates {
+    top
+    right
+    bottom
+    left
+  }
+  dimensions {
+    width
+    height
+  }
+  targetFlowNode {
+    id
+  }
+}
+
+fragment flowEventData on FlowEvent {
+  id
+  type
+  isEntrypoint
+  name
+  description
+  targetFlowNode {
+    id
+  }
+}
+
+fragment flowFlowRefData on FlowFlowRef {
+  id
+  type
+  isEntrypoint
+  targetFlow {
     id
   }
 }

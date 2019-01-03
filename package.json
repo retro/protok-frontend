@@ -7,8 +7,10 @@
   "license": "MIT",
   "dependencies": {
     "@cljs-oss/module-deps": "^1.1.1",
+    "dagre": "^0.8.4",
     "parcel-bundler": "^1.11.0",
     "react": "^16.7.0",
-    "react-dom": "^16.7.0"
+    "react-dom": "^16.7.0",
+    "react-resize-detector": "^3.2.1"
   }
 }

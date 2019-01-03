@@ -6,10 +6,11 @@
 (def get-app-db-path shared/get-app-db-path)
 (def get-id shared/get-id)
 (def get-name shared/get-name)
+(def get-state-app-db-path shared/get-state-app-db-path)
 
 (defn get-state [app-db ctx]
-  (let [app-db-path (get-app-db-path ctx)]
-    (get-in app-db (conj app-db-path :state))))
+  (let [state-app-db-path (get-state-app-db-path ctx)]
+    (get-in app-db state-app-db-path)))
 
 (defn get-args [app-db ctx]
   (let [app-db-path (get-app-db-path ctx)]

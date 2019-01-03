@@ -4,6 +4,10 @@
             [protok.forms.organization :as organization]
             [protok.forms.project :as project]
             [protok.forms.flow :as flow]
+            [protok.forms.flow-event :as flow-event]
+            [protok.forms.flow-flow-ref :as flow-flow-ref]
+            [protok.forms.flow-screen :as flow-screen]
+            [protok.forms.flow-switch :as flow-switch]
             [protok.domain.form-ids :as form-ids]
             [protok.util.forms :refer [provide]]))
 
@@ -22,4 +26,16 @@
    (provide project/constructor form-ids/project)
 
    :flow
-   (provide flow/constructor form-ids/flow)})
+   (provide flow/constructor form-ids/flow)
+
+   :flow-event
+   (provide flow-event/constructor)
+
+   :flow-flow-ref
+   (provide flow-flow-ref/constructor)
+
+   :flow-screen
+   (provide flow-screen/constructor)
+
+   :flow-switch
+   (provide flow-switch/constructor)})

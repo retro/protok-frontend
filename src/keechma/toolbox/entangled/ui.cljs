@@ -10,6 +10,7 @@
 (def get-app-db-path shared/get-app-db-path)
 (def get-id shared/get-id)
 (def get-name shared/get-name)
+(def get-state-app-db-path shared/get-state-app-db-path)
 
 (defn throttle [f interval]
   (let [t (Throttle. f interval)]

@@ -1,6 +1,7 @@
 (ns protok.domain.db
   (:require [medley.core :refer [dissoc-in]]
-            [protok.edb :as edb])
+            [protok.edb :as edb]
+            [camel-snake-kebab.core :refer [->kebab-case-keyword]])
   (:require-macros [protok.domain.db :refer [defkvaccess]]))
 
 (defn path->kv-path [path]
@@ -34,3 +35,14 @@
 
 (defn remove-current-account [app-db]
   (edb/remove-named-item app-db :account :current))
+
+(defn get-current-flow-node [app-db]
+  (when-let [id (get-in app-db [:route :data :node-id])]
+    (edb/get-item-by-id app-db :flow-node id)))
+
+(defn get-current-flow-node-form-type [app-db]
+  (when-let [node (get-current-flow-node app-db)]
+    (->kebab-case-keyword (str "flow_" (:type node)))))
+
+(defn get-current-flow-nodes [app-db]
+  (:flowNodes (edb/get-named-item app-db :flow :current false [:flowNodes])))

@@ -4,7 +4,7 @@
             [protok.styles.colors :refer [colors]]))
 
 (defelement -wrap
-  :class [:flex :flex-column :items-center :p3])
+  :class [:flex :flex-column :items-center :p3 :w100p])
 
 (defelement -icon-wrap
   :class [:flex :items-center :justify-center :bg-green-8 :mb2]
@@ -15,7 +15,7 @@
            {:fill (colors :green-3)}]])
 
 (defelement -content-wrap
-  :class [:fs2 :c-neutral-4])
+  :class [:fs2 :c-neutral-4 :w100p])
 
 (defn render [icon-name content]
   [-wrap

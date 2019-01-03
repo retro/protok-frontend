@@ -56,6 +56,10 @@
        :view-list     (inline-icon :view-list)
        :waves         (inline-icon :waves)
        :chevron-right (inline-icon :chevron-right)
+       :flow-screen   (inline-icon :devices)
+       :flow-event    (inline-icon :cloud-download)
+       :flow-switch   (inline-icon :list)
+       :flow-flow-ref (inline-icon :waves)
        :spinner       spinner}
        (add-icon-classes)))
 

@@ -2,10 +2,14 @@
   '[{:file     "dist/index.js"
      :file-min "dist/index.js"
      :provides ["react"
-                "react-dom"]
+                "react-dom"
+                "react-resize-detector"
+                "dagre"]
 
-     :global-exports {react     React
-                      react-dom ReactDOM}}])
+     :global-exports {react                 React
+                      react-dom             ReactDOM
+                      react-resize-detector ReactResizeDetector
+                      dagre                 Dagre}}])
 
 
 (defproject protok "0.1.0-SNAPSHOT"
@@ -21,6 +25,7 @@
                  [reagent "0.8.1" :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server]]
                  [keechma "0.3.13" :exclusions [cljsjs/react-with-addons cljsjs/react-dom cljsjs/react-dom-server]]
                  [keechma/toolbox "0.1.20" :exclusions [cljsjs/react-with-addons cljsjs/react-dom cljsjs/react-dom-server]]
+                 [keechma/entitydb "0.1.5"]
                  [org.clojars.mihaelkonjevic/garden-basscss "0.2.2"]
                  [binaryage/oops "0.6.2"]
                  [medley "1.0.0"]
