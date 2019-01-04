@@ -51,11 +51,8 @@
                    :node res})))))
 
 (defn add-node-to-current-flow [app-db node]
-  (let [flow (edb/get-named-item app-db :flow :current)
-        nodes (conj (or (:flowNodes flow) []) node)]
-    (js/throw "FIX HERE")
-    ;;(edb/insert-named-item app-db :flow :current (assoc flow :flowNodes nodes))
-    ))
+  (let [flow (edb/get-named-item app-db :flow :current)]
+    (edb/prepend-related-collection app-db :flow :flowNodes flow [node])))
 
 (def actions
   {:on-init (pipeline! [value app-db ctx]

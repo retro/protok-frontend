@@ -13,9 +13,9 @@
 (defn save-option! [app-db flow-node-id option]
   (let [new? (not (:id option))
         option' (-> option
-                    (assoc :targetFlowNodeId (get-in option [:targetFlowNode :id])
-                           :flowNodeId flow-node-id)
-                    (dissoc :targetFlowNode))
+                    (assoc :targetFlowNodeId (get-in option [:targetFlowNode :id]))
+                    (dissoc :targetFlowNode)
+                    (as-> d (if new? (assoc d :flowNodeId flow-node-id) d)))
         mutation (if new? :create-flow-switch-option :update-flow-switch-option)]
     (gql/m! mutation {:input option'} (db/get-jwt app-db))))
 

@@ -258,6 +258,9 @@ fragment flowScreenData on FlowScreen {
   isEntrypoint
   name
   description
+  projectFile {
+    ...projectFileData
+  }
   hotspots {
     ...flowScreenHotspotData
   }
@@ -302,3 +305,14 @@ fragment flowFlowRefData on FlowFlowRef {
   }
 }
 
+mutation CreateProjectFile($input: CreateProjectFileInput!) {
+  createProjectFile(input:$input) {
+    ...projectFileData
+  }
+}
+
+fragment projectFileData on ProjectFile {
+  id
+  serverFilename
+  uploadUrl
+}

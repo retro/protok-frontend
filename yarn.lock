@@ -4161,7 +4161,7 @@ process@^0.11.10:
   resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
   integrity sha1-czIwDoQBYb2j5podHZGn1LwW8YI=
 
-prop-types@^15.6.2:
+prop-types@^15.5.8, prop-types@^15.6.2:
   version "15.6.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.2.tgz#05d5ca77b4453e985d60fc7ff8c859094a497102"
   integrity sha512-3pboPvLiWD7dkI3qf3KbUe6hKFKa52w+AE0VCqECtf+QHAKgOL37tTaNCnuX1nAAQ4ZhyP+kYVKf8rLmJ/feDQ==
@@ -4287,6 +4287,13 @@ react-resize-detector@^3.2.1:
     lodash-es "^4.17.11"
     prop-types "^15.6.2"
     resize-observer-polyfill "^1.5.0"
+
+react-svg-pathline@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/react-svg-pathline/-/react-svg-pathline-0.5.0.tgz#6dbb5a3ffb18f4eab247a1882e68d0b91e501c91"
+  integrity sha512-685c0EA60whNcMrA+nOjGq8Pol0O1uh9wnEyU6tL8h4rKch9F0Z1Bg0JI0BspJKHi2NFGL7lUYC6nuwJajV7eA==
+  dependencies:
+    prop-types "^15.5.8"
 
 react@^16.7.0:
   version "16.7.0"

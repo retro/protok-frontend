@@ -64,6 +64,38 @@
              "Add " (:name n)]))
         flow-node-types)]]]]])
 
+(defelement -node-type-buttons-wrap
+  :class [:h100p]
+  :style [{:width "70px"
+           :padding "10px"}])
+
+(defelement -node-type-button
+  :tag :button
+  :class [:rounded :bg-h-blue-8 :border-none :block :p1 :bg-blue-9 :c-blue-1 :fs0 :pointer]
+  :style [{:width "70px"
+           :outline "none"
+           :margin-bottom "10px"}])
+
+(defelement -node-type-icon-wrap
+  :tag :span
+  :class [:flex :justify-center :items-center :my1 :mx-auto]
+  :style [{}
+          [:svg {:display "block"
+                 :fill (colors :blue-3)}]])
+
+(defn render-buttons [ctx state]
+  [-node-type-buttons-wrap
+   (map 
+    (fn [n]
+      (let [node-type (:type n)]
+        ^{:key node-type}
+        [-node-type-button
+         {:on-click #(<comp-cmd ctx :create-node [node-type true])}
+         [-node-type-icon-wrap
+          (icon (:type n))]
+        "+ " (:name n)]))
+        flow-node-types)])
+
 (defelement -wrap
   :class [:w100p :h100p :overflow-hidden])
 
@@ -71,7 +103,9 @@
     (when (:initialized? state)
       (let [nodes-getter (get-in state [:flow :flowNodes])]
         (if (seq (nodes-getter))
-          [main/render ctx state]
+          [-wrap
+           [render-buttons ctx]
+           [main/render ctx state]]
           [render-empty-state ctx state]))))
 
 (defn state-provider [ctx local-state args]

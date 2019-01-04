@@ -7,11 +7,25 @@
             [protok.util.local-storage :refer [ls-set!]]
             [protok.settings :refer [jwt-ls-name]]
             [protok.edb :as edb]
-            [keechma.toolbox.dataloader.controller :refer [wait-dataloader-pipeline!]]))
+            [keechma.toolbox.dataloader.controller :refer [wait-dataloader-pipeline!]]
+            [promesa.core :as p]))
+
+(defn save-hotspot! [app-db flow-node-id hotspot]
+  (let [new? (not (:id hotspot))
+        hotspot' (-> hotspot
+                    (assoc :targetFlowNodeId (get-in hotspot [:targetFlowNode :id]))
+                    (dissoc :targetFlowNode)
+                    (as-> h (if new? (assoc h :flowNodeId flow-node-id) h)))
+        mutation (if new? :create-flow-screen-hotspot :update-flow-screen-hotspot)]
+    (gql/m! mutation {:input hotspot'} (db/get-jwt app-db))))
+
+(defn save-hotspots! [app-db flow-node-id hotspots]
+  (p/all (map #(save-hotspot! app-db flow-node-id %) hotspots)))
 
 (defn prepare-data [data]
   (-> data
-      (dissoc :type :hotspots)))
+      (assoc :projectFileId (get-in data [:projectFile :id]))
+      (dissoc :type :hotspots :projectFile)))
 
 (defrecord Form [validator])
 
@@ -22,6 +36,7 @@
 
 (defmethod forms-core/submit-data Form [_ app-db [_ id] data]
   (pipeline! [value app-db]
+    (save-hotspots! app-db id (:hotspots data))
     (gql/m!
      [:update-flow-screen :updateFlowScreen]
      {:input (prepare-data data)}

@@ -38,7 +38,7 @@
 
 (defn get-current-flow-node [app-db]
   (when-let [id (get-in app-db [:route :data :node-id])]
-    (edb/get-item-by-id app-db :flow-node id)))
+    (edb/get-item-by-id app-db :flow-node id [:projectFile])))
 
 (defn get-current-flow-node-form-type [app-db]
   (when-let [node (get-current-flow-node app-db)]

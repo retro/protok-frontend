@@ -8,8 +8,10 @@
             [keechma.toolbox.forms.ui :as forms-ui]
             [protok.ui.components.buttons :as buttons]
             [protok.domain.form-ids :as form-ids]
-            [keechma.toolbox.ui :refer [route> sub>]]
-            [protok.ui.shared :refer [<submit-exclusive]]))
+            [keechma.toolbox.ui :refer [<cmd route> sub>]]
+            [protok.ui.shared :refer [<submit-exclusive]]
+            [oops.core :refer [oget]]
+            [protok.domain.project-files :as project-files]))
 
 (defelement -form
   :tag :form
@@ -23,11 +25,41 @@
       :placeholder "Select Target Node"
       :options (map (fn [o] [(:id o) (:name o)]) nodes)}]))
 
+(defn render-screen-hotspot [ctx form-props idx]
+  [:div.bwt1.bd-neutral-8.mt2.pt2
+   [inputs/text ctx form-props [:hotspots idx :name]
+    {:label (str "Hotspot name (" idx ")")}]
+   [flow-node-select ctx form-props [:hotspots idx :targetFlowNode :id]]])
+
+(defelement -screen-img
+  :tag :img
+  :class [:mx-auto :block :mt1]
+  :style [{:max-width "300px"}])
+
 (defn render-screen-form [ctx form-props]
-  [:<>
-   [inputs/text ctx form-props :name 
-    {:label "Name"
-     :placeholder "Name"}]])
+  (let [form-state (forms-ui/form-state> ctx form-props)
+        hotspots (or (forms-ui/value-in> ctx form-props :hotspots) [])
+        project-file (forms-ui/value-in> ctx form-props :projectFile)]
+    [:<>
+     [inputs/text ctx form-props :name 
+      {:label "Name"
+       :placeholder "Name"}]
+     [:div.pb2
+      [:input {:type :file :on-change #(<cmd ctx [:image-uploader :upload] {:file (oget % :target.files.0)
+                                                                            :form-props form-props
+                                                                            :path [:projectFile]})}]
+      (when project-file
+        [-screen-img {:src (project-files/url project-file)}])]
+     [:div
+      (map-indexed
+       (fn [idx o]
+         ^{:key idx}
+         [render-screen-hotspot ctx form-props idx])
+       hotspots)
+      [buttons/secondary-small
+       {:on-click #(forms-ui/<set-value ctx form-props :hotspots (conj hotspots {}))
+        :type :button}
+       "Add Hotspot"]]]))
 
 (defn render-event-form [ctx form-props]
   [:<>

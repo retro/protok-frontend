@@ -4,11 +4,13 @@
      :provides ["react"
                 "react-dom"
                 "react-resize-detector"
+                "react-svg-pathline"
                 "dagre"]
 
      :global-exports {react                 React
                       react-dom             ReactDOM
                       react-resize-detector ReactResizeDetector
+                      react-svg-pathline    ReactSvgPathline
                       dagre                 Dagre}}])
 
 
