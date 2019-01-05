@@ -122,6 +122,10 @@ mutation UpdateFlow($input: UpdateFlowInput!) {
   }
 }
 
+mutation DeleteFlow($id: ID!) {
+  deleteFlow(id: $id)
+}
+
 mutation CreateFlowScreen($input:CreateFlowScreenInput!) {
   createFlowScreen(input:$input){
     ...flowScreenData
@@ -200,6 +204,9 @@ mutation UpdateFlowSwitchOption($input:UpdateFlowSwitchOptionInput!) {
   }
 }
 
+mutation DeleteFlowNode($id: ID!) {
+  deleteFlowNode(id: $id)
+}
 
 fragment flowData on Flow {
   id

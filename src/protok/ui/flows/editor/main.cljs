@@ -2,14 +2,26 @@
   (:require [protok.react :refer [resize-detector pathline]]
             [keechma.ui-component :as ui]
             [keechma.toolbox.entangled.ui :as entangled-ui :refer [<comp-cmd <comp-swap!]]
+            [keechma.toolbox.util :refer [class-names]]
             [keechma.toolbox.css.core :refer-macros [defelement]]
             [keechma.toolbox.logging :as l]
             [keechma.toolbox.ui :refer [route>]]
             [clojure.string :as str]
             [protok.styles.colors :refer [colors]]
-            [protok.domain.project-files :as project-files]))
+            [protok.ui.flows.editor.flow-screen :as flow-screen]
+            [protok.ui.flows.editor.flow-event :as flow-event]
+            [protok.ui.flows.editor.flow-switch :as flow-switch]
+            [protok.ui.flows.editor.flow-flow-ref :as flow-flow-ref]
+            [protok.ui.flows.editor.shared :refer [node-type-icon]]
+            [protok.ui.components.buttons :as buttons]))
 
-(def edge-color (colors :neutral-6))
+(def background-pattern
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.2'%3E%3Cpath opacity='0.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+
+(def edge-colors
+  {:default  (colors :neutral-6)
+   :inactive (colors :neutral-7)
+   :active   (colors :blue-3)})
 
 (defn px [val]
   (str val "px"))
@@ -31,89 +43,138 @@
     [:div
      [:a {:href (ui/url ctx (assoc route :node-id (:id node)))} "EDIT"]]))
 
-(defelement -temp-inner-node-wrap
-  :class [:p2 :rounded])
+(defelement -node-header-wrap
+  :class [:p1 :flex :flex-row :justify-between :items-center :bg-neutral-8])
 
-(defelement -screen-wrap
-  :class [:bg-white :rounded :sh2]
-  :style [{:min-width "300px"}
-          [:img {:width "300px"}]])
+(defelement -node-header-link
+  :tag :a
+  :class [:c-neutral-4 :c-h-white :bg-neutral-9 :bg-h-blue-4 :pill :text-decoration-none :bold :fs0]
+  :style [{:text-transform "uppercase"
+           :padding "3px 12px"
+           :line-height 1
+           :letter-spacing "0.02em"}])
 
-(defn render-screen [ctx state node]
-  (let [pf-getter (:projectFile node)
-        pf (when pf-getter (pf-getter))]
-    [-screen-wrap 
-     [render-resize-detector ctx node]
-     (if pf
-       [:div
-        [:img {:src (project-files/url pf)}]
-        [:div.p1
-         [render-edit-button ctx node]]]
-       [:div.p2
-        "SCREEN " (:name node)
-        [render-edit-button ctx node]])]))
+(defelement -node-header-icons-wrap
+  :style [[:svg {:fill (colors :neutral-4)
+                 :height "18px"
+                 :display "block"}]])
 
-(defelement -event-wrap
-  :class [:bg-white]
-  :style [{:width "300px"}])
+(defn render-node-header [ctx node]
+  (let [route (route> ctx)
+        id (:id node)
+        active-node? (= id (:node-id route))
+        edit-link-props (if active-node?
+                          {:label "Close" :url (dissoc route :node-id)}
+                          {:label "Edit" :url (assoc route :node-id id)})]
+    [-node-header-wrap
+     [-node-header-icons-wrap
+      (node-type-icon (:type node))]
+     [-node-header-link
+      {:href (ui/url ctx (:url edit-link-props))}
+      (:label edit-link-props)]]))
 
-(defn render-event [ctx state node]
-   [-event-wrap
-    [render-resize-detector ctx node]
-    [-temp-inner-node-wrap
-     (:name node)
-     [render-edit-button ctx node]]])
+(defn get-active-nodes [state]
+  (let [edges (get-in state [:layout :layout :edges])
+        active-node-id (:active-node-id state)]
+    (when active-node-id
+      (->> (map 
+            (fn [[_ {:keys [node-ids]}]]
+              (when (contains? node-ids active-node-id)
+                node-ids))
+            edges)
+           (filter (complement nil?))
+           (apply concat)
+           set))))
 
-(defelement -switch-wrap
-  :class [:bg-white]
-  :style [{:width "300px"}])
+(defelement -node-wrap
+  :class [:bg-white :rounded :overflow-hidden]
+  :style [{:width "308px"}])
 
-(defn render-switch [ctx state node]
-  (let [os (:options node)]
-    [-switch-wrap
-     [render-resize-detector ctx node]
-     [-temp-inner-node-wrap
-      (:name node)
-      [:ul.my2
-       (map
-        (fn [o]
-          [:li {:key (:id o)} (:name o)])
-        os)]
-      [render-edit-button ctx node]]]))
+(defelement -inner-node-wrap
+  :class [:bw2 :bd-white]
+  :style [{:padding "2px"}
+          [:&.inactive {:opacity 0.4}]
+          [:&.active {:border-color (edge-colors :active)}]])
 
-(defelement -flow-ref-wrap
-  :class [:bg-white]
-  :style [{:width "300px"}])
-
-(defn render-flow-ref [ctx state node]
-  [-flow-ref-wrap 
-   [render-resize-detector ctx node] 
-   [-temp-inner-node-wrap
-    "FLOW REF"
-    [render-edit-button ctx node]]])
+(defn render-node [ctx state node node-component]
+  (let [active-nodes (get-active-nodes state)
+        active-node-id (:active-node-id state)
+        node-id (:id node)
+        active-node? (= node-id active-node-id)
+        activated-node? (and (seq active-nodes) (contains? active-nodes node-id))
+        inactive-node? (and (seq active-nodes) (not (contains? active-nodes node-id)))]
+    [-node-wrap 
+     {:class (class-names {:sh2 (or (not (seq active-nodes)) (and (not active-node?) activated-node?))
+                           :sh4 active-node?})}
+     [render-resize-detector ctx node] 
+     [-inner-node-wrap
+      {:class (class-names {:inactive inactive-node?
+                            :active (= node-id active-node-id)})}
+      [render-node-header ctx node]
+      [node-component ctx state node]]]))
 
 (defn render-svg-node [ctx state node]
-  (let [node-layout (get-in state [:layout :layout :nodes (:id node)])]
+  (let [node-layout    (get-in state [:layout :layout :nodes (:id node)])
+        node-component (case (:type node)
+                         "SCREEN"   flow-screen/render 
+                         "EVENT"    flow-event/render
+                         "SWITCH"   flow-switch/render
+                         "FLOW_REF" flow-flow-ref/render
+                         nil)]
     [:foreignObject (merge {:width  (px (or (:width node-layout) 0))
                             :height (px (or (:height node-layout) 0))}
                            (calculate-svg-node-position node-layout))
      [:div
       {:style (merge {:visibility (if node-layout "visible" "hidden")})}
-      (case (:type node)
-        "SCREEN"   [render-screen ctx state node]
-        "EVENT"    [render-event ctx state node]
-        "SWITCH"   [render-switch ctx state node]
-        "FLOW_REF" [render-flow-ref ctx state node]
-        nil)]]))
+      [render-node ctx state node node-component]]]))
 
-(defn render-edge [id edge]
+(defn render-edge [id edge _]
+  [pathline {:points (:points edge)
+             :stroke-width 2 
+             :stroke "rgba(0,0,0,0)" 
+             :fill "none"
+             :marker-end "url(#edge-arrow)"
+             :marker-start "url(#edge-circle)"
+             :r 20
+             :stroke-linecap "round"}])
+
+(defn render-active-edge [id edge]
+  [pathline {:points (:points edge)
+             :stroke-width 2 
+             :stroke (edge-colors :active) 
+             :fill "none"
+             :marker-end "url(#active-edge-arrow)"
+             :marker-start "url(#active-edge-circle)"
+             :r 20
+             :stroke-linecap "round"}])
+
+(defn render-edge-bg [id edge edge-color]
   [pathline {:points (:points edge)
              :stroke-width 2 
              :stroke edge-color 
              :fill "none"
-             :marker-end "url(#edge-arrow)"
-             :marker-start "url(#edge-circle)"
              :r 20}])
+
+(defn render-markers
+  ([marker-color] (render-markers marker-color "edge"))
+  ([marker-color prefix]
+   [:<>
+    [:marker {:id (str prefix "-arrow")
+              :markerWidth 10
+              :markerHeight 10
+              :refX 7
+              :refY 5
+              :orient "auto"
+              :viewBox "0 0 20 20"}
+     [:path {:d "M0,0 L10,5 L0,10 z"
+             :fill marker-color}]]
+    [:marker {:id (str prefix "-circle")
+              :markerWidth 10
+              :markerHeight 10
+              :refX 5
+              :refY 5
+              :viewBox "0 0 20 20"}
+     [:circle {:r 4 :cx 5 :cy 5 :fill marker-color}]]]))
 
 (defn render-svg [ctx state]
   (let [layout (get-in state [:layout :layout])
@@ -121,38 +182,39 @@
         width (or (get-in layout [:dimensions :width]) 0)
         height (or (get-in layout [:dimensions :height]) 0)
         nodes-getter (get-in state [:flow :flowNodes])
-        nodes        (nodes-getter)]
+        nodes        (nodes-getter)
+        active-node-id (:active-node-id state)
+        active-edges (filter (fn [[_ e]] (contains? (:node-ids e) active-node-id)) edges)
+
+        edge-color (if (seq active-edges) (edge-colors :inactive) (edge-colors :default))]
+
     [:svg.mx-auto.block {:viewBox (str "0 0 " width " " height) :width width :height height}
      [:defs
-      [:marker {:id "edge-arrow"
-                :markerWidth 10
-                :markerHeight 10
-                :refX 8
-                :refY 5
-                :orient "auto"
-                :viewBox "0 0 20 20"}
-       [:path {:d "M0,0 L10,5 L0,10 z"
-               :fill edge-color}]]
-      [:marker {:id "edge-circle"
-                :markerWidth 10
-                :markerHeight 10
-                :refX 5
-                :refY 5
-                :viewBox "0 0 20 20"}
-       [:circle {:r 4 :cx 5 :cy 5 :fill edge-color}]]]
-     (map (fn [n] 
-            ^{:key (:id n)}
-            [render-svg-node ctx state n])
-          nodes)
+      [render-markers edge-color]
+      [render-markers (edge-colors :active) "active-edge"]]
      (map
       (fn [[id e]]
         ^{:key id}
-        [render-edge id e])
-      edges)]))
+        [render-edge-bg id e edge-color])
+      edges)
+     (map (fn [n] 
+            ^{:key (:id n)}
+            [render-svg-node ctx state n])
+          nodes) 
+     (map
+      (fn [[id e]]
+        ^{:key id}
+        [render-edge id e edge-color])
+      edges)
+     (map
+      (fn [[id e]]
+        ^{:key id}
+        [render-active-edge id e])
+      active-edges)]))
 
 (defelement -sidebar-wrap
   :class [:absolute :right-0 :bottom-0 :top-0 :bg-white :bwl1 :bwt1 :bd-neutral-7 :overflow-auto]
-  :style [{:width "38.2%"}])
+  :style [{:width "500px"}])
 
 (defn render-sidebar [ctx state]
   [-sidebar-wrap
@@ -160,11 +222,13 @@
 
 (defelement -wrap
   :class [:absolute :top-0 :left-0 :right-0 :bottom-0 :overflow-auto :bwt1 :bd-neutral-7]
-  :style [{:left "90px"}
+  :style [{:left "90px"
+           :background-image (str "url(\"" background-pattern "\")")
+           :background-position "-6px -6px"}
           [:&.no-sidebar
            {:right 0}]
           [:&.sidebar
-           {:width "61.8%"}]])
+           {:right "500px"}]])
 
 (defn render [ctx state]
   (let [route        (route> ctx)

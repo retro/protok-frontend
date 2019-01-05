@@ -5,15 +5,21 @@
             [keechma.toolbox.forms.ui :as forms-ui]
             [protok.styles.colors :refer [colors]]
             [keechma.toolbox.css.core :refer-macros [defelement]]
-            [keechma.toolbox.util :refer [class-names]]))
+            [keechma.toolbox.util :refer [class-names]]
+            [clojure.string :as str]))
 
 (def text-inputs-class
-  [:block :fs2 :w100p :rounded :bd-neutral-7 :bw1 :c-neutral-2])
+  [:block :w100p :rounded :bd-neutral-7 :bw1 :c-neutral-2])
+
 (def text-inputs-styles
   [{:padding "5px 9px"
     :box-shadow "0px 1px 0px white, 0px 2px 5px rgba(0,0,0,0.07) inset"
     :outline "none"
     :transition "border-color 0.15s ease-in-out"}
+   [:&.size-normal
+    {:padding "5px 9px"}]
+   [:&.size-small
+    {:padding "3px 7px"}]
    [:&::placeholder {:color (colors :neutral-6)}]
    [:&:focus {:border-color (colors :blue-5)}]
    [:&.has-errors
@@ -52,7 +58,30 @@
           [:&.has-errors {:color (colors :red-6)}]])
 
 (defelement -select
-  :tag :select)
+  :tag :select
+  :class [:block :w100p :rounded :bd-neutral-7 :bw1 :c-neutral-2 :bg-neutral-9]
+  :style [{:-moz-appearance "none"
+           :-webkit-appearance "none"
+           :appearance "none"
+           :background-image "url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')"
+           :background-repeat "no-repeat"
+           :background-position "right .7em top 50%"
+           :background-size ".65em"}
+          [:&.size-normal
+           {:height "36px"
+            :text-indent "9px"}]
+          [:&.size-small
+           {:height "29px"
+            :text-indent "7px"}]
+          [:&::-ms-expand {:display "none"}]
+          [:&:hover {:border-color (colors :neutral-6)}]
+          [:&:focus 
+           {:border-color (colors :blue-5)
+            :outline "none"}]
+          [:&.has-errors
+           {:color (colors :red-3)
+            :border-color (colors :red-8)}
+           [:&:focus {:border-color (colors :red-4)}]]])
 
 (defelement -error-messages-wrap
   :tag :ul
@@ -92,6 +121,9 @@
 (def input-with-composition-support (make-input-with-composition-support -text-input))
 (def textarea-with-composition-support (make-input-with-composition-support -text-area))
 
+(defn process-classes [classes]
+  (str/join " " (map name (filter (complement nil?) (flatten [classes])))))
+
 (defn render-errors [attr-errors]
   (when-let [errors (get-in attr-errors [:$errors$ :failed])]
     (into [-error-messages-wrap]
@@ -109,8 +141,9 @@
   [-label {:class (class-names {:has-errors (seq errors)})}
    (get-label input-props)])
 
-(defn text [ctx form-props attr {:keys [input-type] :as input-props}]
-  (let [errors (forms-ui/errors-in> ctx form-props attr)]
+(defn text [ctx form-props attr {:keys [input-type class] :as input-props}]
+  (let [errors (forms-ui/errors-in> ctx form-props attr)
+        input-size (or (:input/size input-props) :normal)]
     [-fieldset
      [render-label input-props errors]
      [input-with-composition-support
@@ -119,7 +152,10 @@
            :on-blur #(forms-ui/<on-blur ctx form-props attr %)
            :value (forms-ui/value-in> ctx form-props attr)
            :type (or input-type :text)
-           :class (class-names {:has-errors (seq errors)})}
+           :class (class-names {:has-errors (seq errors)
+                                "fs2 size-normal" (= :normal input-size)
+                                "fs1 size-small" (= :small input-size)
+                                (process-classes class) true})}
           (merge (select-keys input-props [:auto-focus :disabled])))]
      [render-errors errors]]))
 
@@ -134,13 +170,39 @@
      :value (forms-ui/value-in> ctx form-props attr)}]
    [render-errors (forms-ui/errors-in> ctx form-props attr)]])
 
-(defn select [ctx form-props attr {:keys [options] :as input-props}]
-  [-fieldset
-   [render-label input-props]
-   [-select
-    {:on-change #(forms-ui/<on-change ctx form-props attr %)
-     :value (or (forms-ui/value-in> ctx form-props attr) "")}
-    [:option {:value ""} (get-placeholder input-props)]
-    (doall (map (fn [[value label]]
-                  [:option {:value value :key value} label]) options))]
-   [render-errors (forms-ui/errors-in> ctx form-props attr)]])
+(defn select [ctx form-props attr {:keys [options optgroups class] :as input-props}]
+  (let [errors (forms-ui/errors-in> ctx form-props attr)
+        placeholder (get-placeholder input-props)
+        input-size (or (:input/size input-props) :normal)]
+    [-fieldset
+     [render-label input-props]
+     [-select
+      {:on-change #(forms-ui/<on-change ctx form-props attr %)
+       :value (or (forms-ui/value-in> ctx form-props attr) "")
+       :class (class-names {:has-errors (seq errors)
+                            "fs2 size-normal" (= :normal input-size)
+                            "fs1 size-small" (= :small input-size)
+                            (process-classes class) true})}
+      [:option {:value ""} placeholder]
+      [:option {:value ""} "—"]
+      (if optgroups
+        (map 
+         (fn [{:keys [label options]}]
+           (when (seq options)
+             [:optgroup {:label label :key label}
+              (map 
+               (fn [{:keys [value label]}]
+                 [:option 
+                  {:value value 
+                   :key value} 
+                  label]) 
+               (sort-by :label options))]))
+         (sort-by :label optgroups))
+        (map 
+         (fn [{:keys [value label]}]
+           [:option 
+            {:value value 
+             :key value} 
+            label]) 
+         (sort-by :label options)))]
+     [render-errors (forms-ui/errors-in> ctx form-props attr)]]))

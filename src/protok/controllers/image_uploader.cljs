@@ -78,7 +78,10 @@
               (pp/commit! (insert-file-into-project-files app-db (:project-file value)))
               (pp/send-command! [id-key :on-change] [(:form-props value) (:path value) nil (:project-file value) nil])
               (upload-s3! {:file (:file value)
-                           :url (get-in value [:project-file :uploadUrl])}))}))
+                           :url (get-in value [:project-file :uploadUrl])}
+                          (fn [e _ app-db]
+                            (let [id (get-in value [:project-file :id])]
+                              (edb/insert-item app-db :project-file {:id id :protok/progress (/ (oget e :loaded) (oget e :total))})))))}))
 
 (defn register
   ([] (register {}))

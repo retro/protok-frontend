@@ -4,7 +4,7 @@
             [keechma.toolbox.css.core :refer-macros [defelement]]
             [reagent.core :as r]
             [protok.ui.flows.editor.actions :refer [actions]]
-            [keechma.toolbox.ui :refer [sub>]]
+            [keechma.toolbox.ui :refer [sub> route>]]
             [protok.ui.components.empty-state :as empty-state]
             [protok.icons :refer [icon]]
             [protok.styles.colors :refer [colors]]
@@ -65,8 +65,8 @@
         flow-node-types)]]]]])
 
 (defelement -node-type-buttons-wrap
-  :class [:h100p]
-  :style [{:width "70px"
+  :class [:h100p :bwr1 :bwt1 :bd-neutral-7]
+  :style [{:width "90px"
            :padding "10px"}])
 
 (defelement -node-type-button
@@ -109,8 +109,12 @@
           [render-empty-state ctx state]))))
 
 (defn state-provider [ctx local-state args]
-  (-> local-state
-      (assoc :flow (sub> ctx :current-flow))))
+  (let [route (route> ctx)
+        node-id (:node-id route)]
+    (-> local-state
+        (assoc :flow (sub> ctx :current-flow)
+               :active-node-id (or (:active-node-id local-state)
+                                   node-id)))))
 
 (def component
   (-> (entangled-ui/constructor

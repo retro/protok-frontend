@@ -44,6 +44,22 @@
     [:&:hover
      {:background (colors :red-3)
       :border-color (colors :red-3)}]]
+
+   [:&.type-dangerous-secondary
+    {:border-color (colors :red-7)
+     :background-color "white" 
+     :color (colors :red-4)}
+    [:svg
+     ["path:not([fill='none'])" {:fill (colors :red-4)}]
+      [:.stroke {:stroke (colors :red-4)}]]
+    [:&:hover
+     {:background-color (colors :red-9)
+      :border-color (colors :red-6)
+      :color (colors :red-3)}
+     [:svg
+      ["path:not([fill='none'])" {:fill (colors :red-3)}]
+      [:.stroke {:stroke (colors :red-3)}]]]]
+
    [:&.type-link
     {:border-color "transparent" 
      :background-color "transparent" 
@@ -151,6 +167,7 @@
             (assoc :class (class-names {:type-primary (or (nil? button-type) (= :primary button-type))
                                         :type-secondary (= :secondary button-type)
                                         :type-dangerous (= :dangerous button-type)
+                                        :type-dangerous-secondary (= :dangerous-secondary button-type)
                                         :type-link (= :link button-type)
                                         :inline-block (not button-fluid)                                      
                                         :pill (:button/pill props')
@@ -171,6 +188,9 @@
 
 (def dangerous-big (make-button {:button/type :dangerous :button/size :big}))
 (def dangerous-small (make-button {:button/type :dangerous :button/size :small}))
+
+(def dangerous-secondary-big (make-button {:button/type :dangerous-secondary :button/size :big}))
+(def dangerous-secondary-small (make-button {:button/type :dangerous-secondary :button/size :small}))
 
 (def link-big (make-button {:button/type :link :button/size :big :type :button}))
 (def link-small (make-button {:button/type :link :button/size :small :type :button}))

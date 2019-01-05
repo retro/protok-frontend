@@ -60,7 +60,7 @@
     (map
      (fn [o]
        (when-let [to-id (get-in o [:targetFlowNode :id])]
-         {:from id :to to-id}))
+         {:from id :to to-id :type :switch}))
      options)))
 
 (defn extract-screen-edges [node]
@@ -69,12 +69,12 @@
     (map
      (fn [o]
        (when-let [to-id (get-in o [:targetFlowNode :id])]
-         {:from id :to to-id}))
+         {:from id :to to-id :type :hotspot}))
      options)))
 
 (defn extract-edges [node]
   (case (:type node)
-    "EVENT" {:from (:id node) :to (get-in node [:targetFlowNode :id])}
+    "EVENT" {:from (:id node) :to (get-in node [:targetFlowNode :id]) :type :event}
     "SWITCH" (extract-switch-edges node)
     "SCREEN" (extract-screen-edges node)
     nil))
@@ -87,14 +87,15 @@
     (ocall g :setGraph #js{:nodesep 50 :ranksep 50 :edgesep 50 :rankdir "tb" :align "dl" :marginx (:left min-margins) :marginy (:top min-margins)})
     (doseq [{:keys [id]} nodes]
       (ocall g :setNode id (clj->js (assoc (get node-dimensions id) :label id))))
-    (doseq [{:keys [from to]} edges]
+    (doseq [{:keys [from to type]} edges] 
       (ocall g :setEdge from to #js{}))
     (ocall dagre :layout g)
     (let [og (ocall g :graph)]
       (-> {:nodes      (into {} (map (fn [n] [n (js->clj (ocall g :node n) :keywordize-keys true)]) (ocall g :nodes)))
            :edges      (into {} (map (fn [e] 
-                                        (let [id [(oget e :v) (oget e :w)]]
-                                          [id (js->clj (ocall g :edge e) :keywordize-keys true)])) (ocall g :edges)))
+                                        (let [id [(oget e :v) (oget e :w)]
+                                              edge (js->clj (ocall g :edge e) :keywordize-keys true)]
+                                          [id (assoc edge :node-ids (set id))])) (ocall g :edges)))
            :dimensions {:width  (oget og :width)
                         :height (oget og :height)}}
           force-margins))))
@@ -108,8 +109,6 @@
         nodes (nodes-getter)
         edges (extract-all-edges nodes)
         layout-id (hash [(map :id nodes) edges node-dimensions])]
-
-
     (cond
       (= layout-id (get-in state [:layout :id])) app-db
       (not (all-nodes-have-dimensions? nodes node-dimensions)) app-db
