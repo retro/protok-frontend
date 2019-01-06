@@ -13,7 +13,7 @@
 (defelement -img
   :tag :img
   :class [:block]
-  :style [{:max-width "300px"}])
+  :style [{:width "300px"}])
 
 (defelement -img-wrap
   :class [:relative])

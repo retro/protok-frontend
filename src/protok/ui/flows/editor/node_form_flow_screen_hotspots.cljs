@@ -14,9 +14,11 @@
   :class [:absolute :top-0 :bottom-0 :left-0 :right-0]
   :style [{:transition "all 0.15s ease-in"}
           [:&.inactive {:opacity 0
-                        :transform "scale(0.95)"}
+                        ;;:transform "scale(0.95)"
+                        }
            [:&:hover {:opacity 1
-                      :transform "scale(1)"}]]])
+                      ;;:transform "scale(1)"
+                      }]]])
 
 (defelement -hotspot
   :class [:absolute :bw2]

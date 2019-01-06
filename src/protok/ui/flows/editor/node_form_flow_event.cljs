@@ -20,4 +20,6 @@
    [inputs/text ctx form-props :name 
     {:label "Name"
      :placeholder "Name"}]
+   [inputs/textarea ctx form-props :description
+    {:label "Description"}]
    [flow-node-select ctx form-props :targetFlowNode.id]])
