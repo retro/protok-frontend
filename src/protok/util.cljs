@@ -17,3 +17,9 @@
   (let [md5 (Md5.)]
     (.update md5 (str/trim (or email "")))
     (str "//www.gravatar.com/avatar/" (byteArrayToHex (.digest md5)) "?size=300&d=mm")))
+
+(defn vec-remove
+  "remove elem in coll"
+  [coll pos]
+  (vec (concat (subvec coll 0 pos) (subvec coll (inc pos)))))
+

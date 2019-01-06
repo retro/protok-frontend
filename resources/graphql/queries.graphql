@@ -330,5 +330,5 @@ mutation DeleteFlowSwitchOption($id: ID!) {
 }
 
 mutation DeleteFlowScreenHotspot($id: ID!) {
-  deleteFlowScreenHotspot($id:id)
+  deleteFlowScreenHotspot(id:$id)
 }

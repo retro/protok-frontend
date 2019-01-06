@@ -14,7 +14,8 @@
             [protok.domain.project-files :as project-files]
             [protok.ui.flows.editor.shared :refer [node-type-name]]
             [protok.icons :refer [icon]]
-            [protok.styles.colors :refer [colors]]))
+            [protok.styles.colors :refer [colors]]
+            [protok.util :refer [vec-remove]]))
 
 (defelement -form-subtitle
   :class [:fs3 :c-neutral-2 :mb1])
@@ -83,20 +84,16 @@
           [:svg {:fill (colors :neutral-6)}]
           [:&:hover [:svg {:fill (colors :red-4)}]]])
 
-(defn render-hotspots-options [ctx form-props child-collection-type idx]
-  (let [remove-action (case child-collection-type
-                        :hotspots :remove-hotspot
-                        :options :remove-option
-                        nil)]
-    [-hotspot-options-wrap
-     [-hotspot-options-index (inc idx)]
-     [-hotspot-options-inner-wrap
-      [inputs/text ctx form-props [child-collection-type idx :name]
-       {:label "Name"
-        :input/size :small}] 
-      [flow-node-select ctx form-props [child-collection-type idx :targetFlowNode :id] {:input/size :small}]
-      [-remove-button-wrap
-       [-remove-button
-        {:type :button
-         :on-click (when remove-action #(<cmd ctx [:flow-editor remove-action] {:form-props form-props :idx idx}))}
-        (icon :remove-circle-outline)]]]]))
+(defn render-hotspots-options [ctx form-props child-collection child-collection-type idx]
+  [-hotspot-options-wrap
+   [-hotspot-options-index (inc idx)]
+   [-hotspot-options-inner-wrap
+    [inputs/text ctx form-props [child-collection-type idx :name]
+     {:label "Name"
+      :input/size :small}] 
+    [flow-node-select ctx form-props [child-collection-type idx :targetFlowNode :id] {:input/size :small}]
+    [-remove-button-wrap
+     [-remove-button
+      {:type :button
+       :on-click #(forms-ui/<set-value ctx form-props child-collection-type (vec-remove child-collection idx))}
+      (icon :remove-circle-outline)]]]])

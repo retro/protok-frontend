@@ -129,7 +129,7 @@
        (map-indexed
         (fn [idx o]
           ^{:key idx}
-          [render-hotspots-options ctx form-props :hotspots idx])
+          [render-hotspots-options ctx form-props hotspots :hotspots idx])
         hotspots)]
       [:div.flex.justify-end
        [buttons/secondary-small

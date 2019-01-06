@@ -6,10 +6,6 @@
             [protok.domain.db :as db]
             [keechma.toolbox.forms.core :as forms-core]))
 
-(defn remove-hotspot! [app-db {:keys [form-props idx]}]
-  (let [form-data (get-in app-db [:kv forms-core/id-key :states form-props :data])]
-    (println form-data)))
-
 (def controller 
   (pp-controller/constructor
    (fn [route]
@@ -21,11 +17,7 @@
                      (pipeline! [value app-db]
                        (gql/m! :delete-flow-node {:id value} (db/get-jwt app-db))
                        (run-dataloader! [:current-flow])
-                       (pp/redirect! (dissoc (get-in app-db [:route :data]) :node-id)))))
-    :remove-hotspot (pipeline! [value app-db]
-                      (remove-hotspot! app-db value))
-    :remove-option (pipeline! [value app-db]
-                     (println "REMOVE OPTION" value))}))
+                       (pp/redirect! (dissoc (get-in app-db [:route :data]) :node-id)))))}))
 
 (defn register
   ([] (register {}))

@@ -8,7 +8,8 @@
             [protok.settings :refer [jwt-ls-name]]
             [protok.edb :as edb]
             [keechma.toolbox.dataloader.controller :refer [wait-dataloader-pipeline!]]
-            [promesa.core :as p]))
+            [promesa.core :as p]
+            [clojure.set :as set]))
 
 (defn save-hotspot! [app-db flow-node-id hotspot]
   (let [new? (not (:id hotspot))
@@ -22,6 +23,17 @@
 (defn save-hotspots! [app-db flow-node-id hotspots]
   (p/all (map #(save-hotspot! app-db flow-node-id %) hotspots)))
 
+(defn delete-hotspot! [app-db hotspot-id]
+  (gql/m! :delete-flow-screen-hotspot {:id hotspot-id} (db/get-jwt app-db)))
+
+(defn delete-hotspots! [app-db form-props data]
+  (let [initial-hotspots (get-in app-db [:kv forms-core/id-key :states form-props :initial-data :hotspots])
+        initial-hotspots-ids (set (filter (complement nil?) (map :id initial-hotspots)))
+        hotspots-ids (set (filter (complement nil?) (map :id (:hotspots data))))
+        missing-ids (seq (set/difference initial-hotspots-ids hotspots-ids))]
+   (when missing-ids
+     (p/all (map #(delete-hotspot! app-db %) missing-ids)))))
+
 (defn prepare-data [data]
   (-> data
       (assoc :projectFileId (get-in data [:projectFile :id]))
@@ -34,13 +46,15 @@
     (wait-dataloader-pipeline!)
     (db/get-current-flow-node app-db)))
 
-(defmethod forms-core/submit-data Form [_ app-db [_ id] data]
-  (pipeline! [value app-db]
-    (save-hotspots! app-db id (:hotspots data))
-    (gql/m!
-     [:update-flow-screen :updateFlowScreen]
-     {:input (prepare-data data)}
-     (db/get-jwt app-db))))
+(defmethod forms-core/submit-data Form [_ app-db form-props data]
+  (let [[_ id] form-props]
+    (pipeline! [value app-db]
+      (delete-hotspots! app-db form-props data)
+      (save-hotspots! app-db id (:hotspots data))
+      (gql/m!
+       [:update-flow-screen :updateFlowScreen]
+       {:input (prepare-data data)}
+       (db/get-jwt app-db)))))
 
 (defmethod forms-core/on-submit-success Form [this app-db [_ id] data]
   (pipeline! [value app-db]
