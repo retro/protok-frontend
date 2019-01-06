@@ -309,6 +309,7 @@ fragment flowFlowRefData on FlowFlowRef {
   isEntrypoint
   targetFlow {
     id
+    name
   }
 }
 
@@ -322,4 +323,12 @@ fragment projectFileData on ProjectFile {
   id
   serverFilename
   uploadUrl
+}
+
+mutation DeleteFlowSwitchOption($id: ID!) {
+  deleteFlowSwitchOption(id:$id)
+}
+
+mutation DeleteFlowScreenHotspot($id: ID!) {
+  deleteFlowScreenHotspot($id:id)
 }

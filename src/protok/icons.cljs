@@ -48,19 +48,21 @@
    {} icons))
 
 (def icons
-  (-> {:email         (inline-icon :email)
-       :arrow-forward (inline-icon :arrow-forward)
-       :arrow-back    (inline-icon :arrow-back)
-       :group         (inline-icon :group)
-       :add           (inline-icon :add)
-       :view-list     (inline-icon :view-list)
-       :waves         (inline-icon :waves)
-       :chevron-right (inline-icon :chevron-right)
-       :flow-screen   (inline-icon :devices)
-       :flow-event    (inline-icon :cloud-download)
-       :flow-switch   (inline-icon :list)
-       :flow-flow-ref (inline-icon :waves)
-       :spinner       spinner}
+  (-> {:email                 (inline-icon :email)
+       :arrow-forward         (inline-icon :arrow-forward)
+       :arrow-back            (inline-icon :arrow-back)
+       :group                 (inline-icon :group)
+       :add                   (inline-icon :add)
+       :view-list             (inline-icon :view-list)
+       :waves                 (inline-icon :waves)
+       :chevron-right         (inline-icon :chevron-right)
+       :flow-screen           (inline-icon :devices)
+       :flow-event            (inline-icon :cloud-download)
+       :flow-switch           (inline-icon :list)
+       :flow-flow-ref         (inline-icon :waves)
+       :add-photo-alternate   (inline-icon :add-photo-alternate)
+       :remove-circle-outline (inline-icon :remove-circle-outline)
+       :spinner               spinner}
        (add-icon-classes)))
 
 (defn icon [i]

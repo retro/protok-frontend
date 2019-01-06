@@ -102,10 +102,11 @@
 (defn render [ctx state]
     (when (:initialized? state)
       (let [nodes-getter (get-in state [:flow :flowNodes])]
-        (if (seq (nodes-getter))
+        (if (and nodes-getter (seq (nodes-getter)))
           [-wrap
            [render-buttons ctx]
-           [main/render ctx state]]
+           [main/render ctx state]
+           ]
           [render-empty-state ctx state]))))
 
 (defn state-provider [ctx local-state args]

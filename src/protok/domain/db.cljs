@@ -46,3 +46,6 @@
 
 (defn get-current-flow-nodes [app-db]
   (:flowNodes (edb/get-named-item app-db :flow :current false [:flowNodes])))
+
+(defn get-project-file-by-id [app-db id]
+  (edb/get-item-by-id app-db :project-file id))

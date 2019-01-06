@@ -13,4 +13,5 @@
    :account-menu-open?          (as-sub db/get-account-menu-open?)
    :current-flow-node           (as-sub db/get-current-flow-node)
    :current-flow-node-form-type (as-sub db/get-current-flow-node-form-type)
-   :current-flow-nodes          (as-sub db/get-current-flow-nodes)})
+   :current-flow-nodes          (as-sub db/get-current-flow-nodes)
+   :project-file-by-id          (as-sub db/get-project-file-by-id)})

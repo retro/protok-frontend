@@ -68,7 +68,7 @@
            :background-position "right .7em top 50%"
            :background-size ".65em"}
           [:&.size-normal
-           {:height "36px"
+           {:height "39px"
             :text-indent "9px"}]
           [:&.size-small
            {:height "29px"
@@ -159,16 +159,23 @@
           (merge (select-keys input-props [:auto-focus :disabled])))]
      [render-errors errors]]))
 
-(defn textarea [ctx form-props attr {:keys [rows] :as input-props}]
-  [-fieldset
-   [render-label input-props]
-   [textarea-with-composition-support
-    {:placeholder (get-placeholder input-props)
-     :rows (or rows 8)
-     :on-change #(forms-ui/<on-change ctx form-props attr %)
-     :on-blur #(forms-ui/<on-blur ctx form-props attr %)
-     :value (forms-ui/value-in> ctx form-props attr)}]
-   [render-errors (forms-ui/errors-in> ctx form-props attr)]])
+(defn textarea [ctx form-props attr {:keys [rows class] :as input-props}]
+  (let [errors (forms-ui/errors-in> ctx form-props attr)
+        input-size (or (:input/size input-props) :normal)]
+    [-fieldset
+     [render-label input-props]
+     [textarea-with-composition-support
+      {:placeholder (get-placeholder input-props)
+       :rows (or rows 8)
+       :on-change #(forms-ui/<on-change ctx form-props attr %)
+       :on-blur #(forms-ui/<on-blur ctx form-props attr %)
+       :value (forms-ui/value-in> ctx form-props attr)
+       :style {:resize "vertical"}
+       :class (class-names {:has-errors (seq errors)
+                            "fs2 size-normal" (= :normal input-size)
+                            "fs1 size-small" (= :small input-size)
+                            (process-classes class) true})}]
+     [render-errors (forms-ui/errors-in> ctx form-props attr)]]))
 
 (defn select [ctx form-props attr {:keys [options optgroups class] :as input-props}]
   (let [errors (forms-ui/errors-in> ctx form-props attr)

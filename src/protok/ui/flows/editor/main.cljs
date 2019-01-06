@@ -18,6 +18,8 @@
 (def background-pattern
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.2'%3E%3Cpath opacity='0.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
 
+(def sidebar-width "600px")
+
 (def edge-colors
   {:default  (colors :neutral-6)
    :inactive (colors :neutral-7)
@@ -214,13 +216,20 @@
 
 (defelement -sidebar-wrap
   :class [:absolute :right-0 :bottom-0 :top-0 :bg-white :bwl1 :bwt1 :bd-neutral-7 :overflow-auto]
-  :style [{:width "500px"}])
+  :style [{:width sidebar-width}])
 
 (defn render-sidebar [ctx state]
   [-sidebar-wrap
    [(ui/component ctx :flows/node-form)]])
 
 (defelement -wrap
+  :style [[:.protok_ui_flows_editor_main--editor-wrap
+            {:right 0}]
+          [:&.has-sidebar
+           [:.protok_ui_flows_editor_main--editor-wrap
+            {:right sidebar-width}]]])
+
+(defelement -editor-wrap
   :class [:absolute :top-0 :left-0 :right-0 :bottom-0 :overflow-auto :bwt1 :bd-neutral-7]
   :style [{:left "90px"
            :background-image (str "url(\"" background-pattern "\")")
@@ -228,18 +237,21 @@
           [:&.no-sidebar
            {:right 0}]
           [:&.sidebar
-           {:right "500px"}]])
+           {:right sidebar-width}]])
+
+(defn render-editor [ctx state]
+  (let [editor-wrap-id (str (gensym "editor-wrap"))]
+    (fn [ctx state]
+      [-editor-wrap
+       {:ref #(<comp-swap! ctx assoc :editor-el editor-wrap-id)
+        :id editor-wrap-id} 
+       [render-svg ctx state]])))
 
 (defn render [ctx state]
   (let [route        (route> ctx)
-        nodes-getter (get-in state [:flow :flowNodes])
-        nodes        (nodes-getter)
-        layout       (get-in state [:layout :layout])
-        has-sidebar? (:node-id route)
-        edges        (:edges layout)]
+        has-sidebar? (:node-id route)]
     ;;(l/pp "LAYOUT" layout)
-    [:<>
-     [-wrap {:class (if has-sidebar? :sidebar :no-sidebar)}
-      [render-svg ctx state]]
+    [-wrap {:class (when has-sidebar? :has-sidebar)}
+     [render-editor ctx state]
      (when has-sidebar?
        [render-sidebar ctx state])]))
