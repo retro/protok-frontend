@@ -5,12 +5,14 @@
                 "react-dom"
                 "react-resize-detector"
                 "react-svg-pathline"
+                "react-rnd"
                 "dagre"]
 
      :global-exports {react                 React
                       react-dom             ReactDOM
                       react-resize-detector ReactResizeDetector
                       react-svg-pathline    ReactSvgPathline
+                      react-rnd             ReactRnd
                       dagre                 Dagre}}])
 
 

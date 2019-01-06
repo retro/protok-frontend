@@ -62,6 +62,7 @@
        :flow-flow-ref         (inline-icon :waves)
        :add-photo-alternate   (inline-icon :add-photo-alternate)
        :remove-circle-outline (inline-icon :remove-circle-outline)
+       :close                 (inline-icon :close)
        :spinner               spinner}
        (add-icon-classes)))
 

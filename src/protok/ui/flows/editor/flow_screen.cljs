@@ -1,6 +1,7 @@
 (ns protok.ui.flows.editor.flow-screen
   (:require [keechma.toolbox.css.core :refer-macros [defelement]]
-            [protok.domain.project-files :as project-files]))
+            [protok.domain.project-files :as project-files]
+            [keechma.ui-component :as ui]))
 
 (defelement -wrap 
   :class [:fs2 :c-neutral-2])
@@ -50,4 +51,5 @@
         (when (and progress (not= 1 progress))
           [-img-progress-wrap
            [-img-progress-inner-wrap
-            [-img-progress {:style {:width (str (* 100 progress) "%")}}]]])])]))
+            [-img-progress {:style {:width (str (* 100 progress) "%")}}]]])
+        [(ui/component ctx :flows/node-form-flow-screen-hotspots) node]])]))

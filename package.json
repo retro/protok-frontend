@@ -12,6 +12,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-resize-detector": "^3.2.1",
+    "react-rnd": "^9.0.4",
     "react-svg-pathline": "^0.5.0"
   }
 }

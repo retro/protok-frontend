@@ -11,23 +11,25 @@
             [protok.ui.flows.form :as flows-form]
             [protok.ui.flows.editor :as flows-editor]
             [protok.ui.flows.editor.node-form :as flows-editor-node-form]
+            [protok.ui.flows.editor.node-form-flow-screen-hotspots :as flows-editor-node-form-flow-screen-hotspots]
             [protok.ui.loading :as loading]
             [protok.ui.components.layout :as layout]
             [protok.ui.components.content-layout :as content-layout]))
 
 (def ui
-  {:main                     main/component
-   :editor                   editor/component
-   :login                    login/component
-   :loading                  loading/component
-   :not-found                not-found/component
-   :organizations/list       organizations-list/component
-   :organizations/form       organizations-form/component
-   :projects/list            projects-list/component
-   :projects/form            projects-form/component
-   :flows/list               flows-list/component
-   :flows/form               flows-form/component
-   :flows/editor             flows-editor/component
-   :flows/node-form          flows-editor-node-form/component
-   :component/layout         layout/component
-   :component/content-layout content-layout/component})
+  {:main                                 main/component
+   :editor                               editor/component
+   :login                                login/component
+   :loading                              loading/component
+   :not-found                            not-found/component
+   :organizations/list                   organizations-list/component
+   :organizations/form                   organizations-form/component
+   :projects/list                        projects-list/component
+   :projects/form                        projects-form/component
+   :flows/list                           flows-list/component
+   :flows/form                           flows-form/component
+   :flows/editor                         flows-editor/component
+   :flows/node-form                      flows-editor-node-form/component
+   :flows/node-form-flow-screen-hotspots flows-editor-node-form-flow-screen-hotspots/component
+   :component/layout                     layout/component
+   :component/content-layout             content-layout/component})

@@ -47,6 +47,10 @@
       force-left-margins
       force-top-margins))
 
+(defn add-max-edge-index [layout]
+  (let [max-index (apply max (filter (complement nil?) (map :index (vals (:edges layout)))))]
+    (assoc layout :max-edge-index max-index)))
+
 (def Graph (oget dagre :graphlib.Graph))
 
 (defn all-nodes-have-dimensions? [nodes node-dimensions]
@@ -57,19 +61,19 @@
 (defn extract-switch-edges [node]
   (let [id (:id node)
         options (:options node)]
-    (map
-     (fn [o]
+    (map-indexed
+     (fn [idx o]
        (when-let [to-id (get-in o [:targetFlowNode :id])]
-         {:from id :to to-id :type :switch}))
+         {:from id :to to-id :type :switch :index idx}))
      options)))
 
 (defn extract-screen-edges [node]
   (let [id (:id node)
         options (:hotspots node)]
-    (map
-     (fn [o]
+    (map-indexed
+     (fn [idx o]
        (when-let [to-id (get-in o [:targetFlowNode :id])]
-         {:from id :to to-id :type :hotspot}))
+         {:from id :to to-id :type :hotspot :index idx}))
      options)))
 
 (defn extract-edges [node]
@@ -87,8 +91,8 @@
     (ocall g :setGraph #js{:nodesep 50 :ranksep 50 :edgesep 50 :rankdir "tb" :align "dl" :marginx (:left min-margins) :marginy (:top min-margins)})
     (doseq [{:keys [id]} nodes]
       (ocall g :setNode id (clj->js (assoc (get node-dimensions id) :label id))))
-    (doseq [{:keys [from to type]} edges] 
-      (ocall g :setEdge from to #js{}))
+    (doseq [{:keys [from to index]} edges] 
+      (ocall g :setEdge from to #js{:index index}))
     (ocall dagre :layout g)
     (let [og (ocall g :graph)]
       (-> {:nodes      (into {} (map (fn [n] [n (js->clj (ocall g :node n) :keywordize-keys true)]) (ocall g :nodes)))
@@ -98,7 +102,8 @@
                                           [id (assoc edge :node-ids (set id))])) (ocall g :edges)))
            :dimensions {:width  (oget og :width)
                         :height (oget og :height)}}
-          force-margins))))
+          force-margins
+          add-max-edge-index))))
 
 (defn update-layout [app-db ctx]
   (let [state-path (get-state-app-db-path ctx)

@@ -15,7 +15,9 @@
             [protok.ui.flows.editor.node-form-flow-screen]
             [protok.ui.flows.editor.node-form-flow-switch]
             [protok.ui.flows.editor.node-form-flow-flow-ref]
-            [protok.ui.flows.editor.shared :refer [node-type-name]]))
+            [protok.ui.flows.editor.shared :refer [node-type-name]]
+            [protok.icons :refer [icon]]
+            [protok.styles.colors :refer [colors]]))
 
 (defelement -form
   :tag :form
@@ -23,6 +25,15 @@
 
 (defelement -form-title
   :class [:fs4 :c-neutral-2 :mb2])
+
+(defelement -form-title-wrap
+  :class [:flex :justify-between])
+
+(defelement -close-form-link
+  :tag :a
+  :class [:block]
+  :style [[:svg {:fill (colors :neutral-4)}]
+          [:&:hover [:svg {:fill (colors :blue-4)}]]])
 
 (defn render [ctx]
   (let [route             (route> ctx)
@@ -41,7 +52,11 @@
                             nil)]
     (when form-state
       [-form {:on-submit #(<submit-exclusive ctx form-props %)}
-       [-form-title "Edit " (node-type-name (:type current-flow-node))]
+       [-form-title-wrap
+        [-form-title "Edit " (node-type-name (:type current-flow-node))]
+        [-close-form-link
+         {:href (ui/url ctx (dissoc route :node-id))}
+         (icon :close)]]
        (when form-renderer
          [form-renderer ctx form-props])
        [:div.flex.justify-between.mt2.pt2.bwt1.bd-neutral-7
