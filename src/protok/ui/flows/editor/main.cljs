@@ -126,8 +126,8 @@
     [:foreignObject (merge {:width  (px (or (:width node-layout) 0))
                             :height (px (or (:height node-layout) 0))}
                            (calculate-svg-node-position node-layout))
-     [:div
-      {:style (merge {:visibility (if node-layout "visible" "hidden")})}
+     [:div 
+      {:style {:visibility (if node-layout "visible" "hidden")}}
       [render-node ctx state node node-component]]]))
 
 (defn render-edge [id edge _]
@@ -251,7 +251,8 @@
   :class [:absolute :top-0 :left-0 :right-0 :bottom-0 :overflow-auto :bwt1 :bd-neutral-7]
   :style [{:left "90px"
            :background-image (str "url(\"" background-pattern "\")")
-           :background-position "-6px -6px"}
+           :background-position "-6px -6px"
+           :transform "translate3d(0,0,0)"}
           [:&.no-sidebar
            {:right 0}]
           [:&.sidebar
