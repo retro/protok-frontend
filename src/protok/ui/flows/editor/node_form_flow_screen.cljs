@@ -18,7 +18,7 @@
             [protok.styles.colors :refer [colors]]))
 
 (def checkers-bg
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cg fill='%23000000' fill-opacity='0.09'%3E%3Cpath fill-rule='evenodd' d='M0 0h5v5H0V0zm5 5h5v5H5V5z'/%3E%3C/g%3E%3C/svg%3E\")")
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cg fill='%23000000' fill-opacity='0.05'%3E%3Cpath fill-rule='evenodd' d='M0 0h5v5H0V0zm5 5h5v5H5V5z'/%3E%3C/g%3E%3C/svg%3E\")")
 
 (defelement -img-progress-wrap
   :class [:absolute]

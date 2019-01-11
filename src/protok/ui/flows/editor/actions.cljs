@@ -74,7 +74,10 @@
 (def actions
   {:on-init (pipeline! [value app-db ctx]
               (wait-dataloader-pipeline!)
-              (epp/comp-commit! (assoc (epp/get-state app-db ctx) :initialized? true)))
+              (epp/comp-commit! (assoc (epp/get-state app-db ctx)
+                                       :initialized? true
+                                       :options {:direction :vertical
+                                                 :zoom :actual})))
    :on-state-change (pipeline! [value app-db ctx]
                       (epp/comp-execute! :calculate-layout))
    :calculate-layout (pipeline! [value app-db ctx]

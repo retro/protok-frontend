@@ -6,6 +6,7 @@
                 "react-resize-detector"
                 "react-svg-pathline"
                 "react-rnd"
+                "react-modal"
                 "dagre"]
 
      :global-exports {react                 React
@@ -13,6 +14,7 @@
                       react-resize-detector ReactResizeDetector
                       react-svg-pathline    ReactSvgPathline
                       react-rnd             ReactRnd
+                      react-modal           ReactModal
                       dagre                 Dagre}}])
 
 

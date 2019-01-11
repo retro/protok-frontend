@@ -166,7 +166,7 @@
      [render-label input-props]
      [textarea-with-composition-support
       {:placeholder (get-placeholder input-props)
-       :rows (or rows 8)
+       :rows (or rows 6)
        :on-change #(forms-ui/<on-change ctx form-props attr %)
        :on-blur #(forms-ui/<on-blur ctx form-props attr %)
        :value (forms-ui/value-in> ctx form-props attr)

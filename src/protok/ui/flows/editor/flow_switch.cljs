@@ -1,5 +1,6 @@
 (ns protok.ui.flows.editor.flow-switch
-  (:require [keechma.toolbox.css.core :refer-macros [defelement]]))
+  (:require [keechma.toolbox.css.core :refer-macros [defelement]]
+            [keechma.toolbox.entangled.ui :refer [<comp-swap!]]))
 
 (defelement -wrap
   :class [:fs1 :c-neutral-2 :p1])
@@ -19,15 +20,19 @@
            :top "2px"}])
 
 (defn render [ctx state node]
-  (let [options (:options node)]
+  (let [options (:options node)
+        node-id (:id node)]
     [-wrap
      [:span.fs2 (:name node)]
      (when (seq options)
        [:ul.pt1
         (map-indexed
-         (fn [idx {:keys [id name]}]
-           ^{:key id}
-           [-option-item
-            [-option-idx (inc idx)]
-            name])
+         (fn [idx {:keys [id name] :as o}]
+           (let [target-node-id (get-in o [:targetFlowNode :id])]
+             ^{:key id}
+             [-option-item
+              {:on-mouse-enter #(<comp-swap! ctx assoc :active-edge-id [node-id target-node-id])
+               :on-mouse-leave #(<comp-swap! ctx assoc :active-edge-id nil)}
+              [-option-idx (inc idx)]
+              name]))
          options)])]))

@@ -13,7 +13,22 @@
             [protok.ui.flows.editor.flow-switch :as flow-switch]
             [protok.ui.flows.editor.flow-flow-ref :as flow-flow-ref]
             [protok.ui.flows.editor.shared :refer [node-type-icon]]
-            [protok.ui.components.buttons :as buttons]))
+            [protok.ui.components.buttons :as buttons]
+            [protok.ui.flows.editor.shared :refer [flow-node-types]]))
+
+(def graph-options
+  [{:label   "Direction"
+    :id      :direction
+    :options [{:label "Horizontal"
+               :value :horizontal}
+              {:label "Vertical"
+               :value :vertical}]}
+   {:label "Zoom"
+    :id :zoom
+    :options [{:label "100%"
+               :value :actual}
+              {:label "Fit"
+               :value :fit}]}])
 
 (def background-pattern
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.2'%3E%3Cpath opacity='0.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
@@ -197,17 +212,22 @@
      (range (inc max-edge-index)))]))
 
 (defn render-svg [ctx state]
-  (let [layout (get-in state [:layout :layout])
-        edges (:edges layout)
-        width (or (get-in layout [:dimensions :width]) 0)
-        height (or (get-in layout [:dimensions :height]) 0)
-        nodes-getter (get-in state [:flow :flowNodes])
-        nodes        (nodes-getter)
+  (let [layout         (get-in state [:layout :layout])
+        edges          (:edges layout)
+        width          (or (get-in layout [:dimensions :width]) 0)
+        height         (or (get-in layout [:dimensions :height]) 0)
+        nodes-getter   (get-in state [:flow :flowNodes])
+        nodes          (nodes-getter)
         active-node-id (:active-node-id state)
-        active-edges (filter (fn [[_ e]] (contains? (:node-ids e) active-node-id)) edges)
-        edge-color (if (seq active-edges) (edge-colors :inactive) (edge-colors :default))
+        active-edge-id (:active-edge-id state)
+        active-edges   (cond 
+                         active-node-id (filter (fn [[_ e]] (contains? (:node-ids e) active-node-id)) edges)
+                         active-edge-id (filter (complement nil?) [[active-edge-id (get edges active-edge-id)]])
+                         :else          nil)
+        edge-color     (if (seq active-edges) (edge-colors :inactive) (edge-colors :default))
         max-edge-index (:max-edge-index layout)]
 
+    
     [:svg.mx-auto.block {:viewBox (str "0 0 " width " " height) :width width :height height}
      [:defs
       [render-markers max-edge-index edge-color]
@@ -242,35 +262,113 @@
 
 (defelement -wrap
   :style [[:.protok_ui_flows_editor_main--editor-wrap
-            {:right 0}]
+           :.protok_ui_flows_editor_main--menu-wrap
+           {:right 0}]
           [:&.has-sidebar
            [:.protok_ui_flows_editor_main--editor-wrap
+            :.protok_ui_flows_editor_main--menu-wrap
             {:right sidebar-width}]]])
 
 (defelement -editor-wrap
-  :class [:absolute :top-0 :left-0 :right-0 :bottom-0 :overflow-auto :bwt1 :bd-neutral-7]
-  :style [{:left "90px"
+  :class [:absolute :left-0 :right-0 :bottom-0 :overflow-auto :bwt1 :bd-neutral-7]
+  :style [{:top "50px"
            :background-image (str "url(\"" background-pattern "\")")
            :background-position "-6px -6px"
            :transform "translate3d(0,0,0)"}
-          [:&.no-sidebar
-           {:right 0}]
-          [:&.sidebar
-           {:right sidebar-width}]])
+          [:&.zoom-fit
+           [:svg {:max-width "100%"
+                  :max-height "100%"}]]])
 
 (defn render-editor [ctx state]
   (let [editor-wrap-id (str (gensym "editor-wrap"))]
     (fn [ctx state]
       [-editor-wrap
        {:ref #(<comp-swap! ctx assoc :editor-el editor-wrap-id)
-        :id editor-wrap-id} 
+        :id editor-wrap-id
+        :class (class-names {:zoom-fit (= :fit (get-in state [:options :zoom]))})} 
        [render-svg ctx state]])))
+
+(defelement -menu-wrap
+  :class [:absolute :top-0 :left-0 :bd-neutral-7 :bwt1 :flex :flex-row :justify-center :items-center]
+  :style [{:height "50px"}])
+
+(defelement -menu-group-wrap
+  :class [:flex :flex-row :items-center :mx2])
+
+(defelement -menu-group-label
+  :class [:c-neutral-4 :fs0 :bold :mr1]
+  :style [{:text-transform "uppercase"}])
+
+(defelement -menu-group-buttons-wrap
+  :style [{:padding-left "1px"}])
+
+(defelement -menu-group-button
+  :tag :button
+  :class [:bg-neutral-9 :bd-neutral-7 :bw1 :fs0 :c-neutral-3 :center :pointer :relative]
+  :style [{:padding "0px 10px"
+           :margin-left "-1px"
+           :height "24px"
+           :min-width "5rem"
+           :outline "none"}
+          [:&:first-child
+           {:border-top-left-radius "3px"
+            :border-bottom-left-radius "3px"}]
+          [:&:last-child
+           {:border-top-right-radius "3px"
+            :border-bottom-right-radius "3px"}]
+          [:&:hover
+           {:background-color (colors :neutral-6)
+            :border-color (colors :netural-6)
+            :color (colors :white)}]
+          [:&.active
+           {:background-color (colors :blue-4)
+            :border-color (colors :blue-4)
+            :color (colors :white)
+            :z-index 1}]])
+
+(defn render-menu [ctx state]
+  (let [active-graph-options (:options state)]
+    [-menu-wrap
+     [-menu-group-wrap
+      [-menu-group-label "Add new"]
+      [-menu-group-buttons-wrap
+       (map 
+        (fn [n]
+          (let [node-type (:type n)]
+            ^{:key node-type}
+            [-menu-group-button
+             {:on-click #(<comp-cmd ctx :create-node [node-type true])}
+             (:name n)]))
+        flow-node-types)]]
+     [-menu-group-wrap
+      [-menu-group-buttons-wrap
+       [-menu-group-button "Add multiple screens"]]]
+     (map 
+      (fn [g]
+        (let [option-id (:id g)]
+          ^{:key option-id}
+          [-menu-group-wrap
+           (when-let [label (:label g)]
+             [-menu-group-label label])
+           [-menu-group-buttons-wrap
+            (map
+             (fn [o]
+               (let [option-value (:value o)]
+                 ^{:key option-value}
+                 [-menu-group-button
+                  {:on-click #(<comp-swap! ctx assoc-in [:options option-id] option-value)
+                   :class (class-names {:active (= option-value (get active-graph-options option-id))})}
+                  (:label o)]))
+             (:options g))]]))
+      graph-options)]))
+
 
 (defn render [ctx state]
   (let [route        (route> ctx)
         has-sidebar? (:node-id route)]
     ;;(l/pp "LAYOUT" layout)
     [-wrap {:class (when has-sidebar? :has-sidebar)}
+     [render-menu ctx state]
      [render-editor ctx state]
      (when has-sidebar?
        [render-sidebar ctx state])]))

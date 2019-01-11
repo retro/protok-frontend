@@ -1,7 +1,9 @@
 (ns protok.ui.flows.editor.flow-screen
   (:require [keechma.toolbox.css.core :refer-macros [defelement]]
             [protok.domain.project-files :as project-files]
-            [keechma.ui-component :as ui]))
+            [keechma.ui-component :as ui]
+            [keechma.toolbox.ui :refer [route>]]
+            [protok.ui.flows.editor.node-form-flow-screen-hotspots :refer [render-hotspots]]))
 
 (defelement -wrap 
   :class [:fs2 :c-neutral-2])
@@ -42,7 +44,8 @@
 (defn render [ctx state node]
   (let [pf-getter (:projectFile node)
         pf (when pf-getter (pf-getter))
-        progress (:protok/progress pf)]
+        progress (:protok/progress pf)
+        active-node-id (:active-node-id (route> ctx))]
     [-wrap
      [-name-wrap {:class (when pf :bwb1)} (:name node)]
      (when pf 
@@ -52,4 +55,6 @@
           [-img-progress-wrap
            [-img-progress-inner-wrap
             [-img-progress {:style {:width (str (* 100 progress) "%")}}]]])
-        [(ui/component ctx :flows/node-form-flow-screen-hotspots) node]])]))
+        (if active-node-id
+          [(ui/component ctx :flows/node-form-flow-screen-hotspots) node]
+          [render-hotspots ctx node])])]))

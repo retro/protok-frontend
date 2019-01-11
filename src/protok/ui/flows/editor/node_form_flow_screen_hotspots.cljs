@@ -5,7 +5,8 @@
             [protok.react :refer [resize-detector rnd]]
             [reagent.core :as r]
             [oops.core :refer [ocall oget]]
-            [protok.styles.colors :refer [colors]]))
+            [protok.styles.colors :refer [colors]]
+            [keechma.toolbox.entangled.ui :refer [<comp-swap!]]))
 
 (defn px [v]
   (str v "px"))
@@ -14,11 +15,9 @@
   :class [:absolute :top-0 :bottom-0 :left-0 :right-0]
   :style [{:transition "all 0.15s ease-in"}
           [:&.inactive {:opacity 0
-                        :transform "scale(1.02)"
-                        }
+                        :transform "scale(1.02)"}
            [:&:hover {:opacity 1
-                      :transform "scale(1)"
-                      }]]])
+                      :transform "scale(1)"}]]])
 
 (defelement -hotspot
   :class [:absolute :bw2]
@@ -105,7 +104,7 @@
             [render-editable-hotspot ctx form-props idx hotspot el-dimensions])
           hotspots)]))))
 
-(defn render-hotspot [ctx idx hotspot el-dimensions]
+(defn render-hotspot [ctx node idx hotspot el-dimensions]
   (let [width     (or (get-in hotspot [:dimensions :width]) 0.5)
         height    (or (get-in hotspot [:dimensions :height]) 0.1)
         top       (or (get-in hotspot [:coordinates :top]) 0.1)
@@ -115,13 +114,17 @@
         real-left (* left el-width)
         real-top  (* top el-height)
         real-width (* width el-width)
-        real-height (* height el-height)]
+        real-height (* height el-height)
+        node-id (:id node)
+        target-node-id (get-in hotspot [:targetFlowNode :id])]
     [-hotspot
      {:class "inactive"
       :style {:top (px real-top)
               :left (px real-left)
               :width (px real-width)
-              :height (px real-height)}}
+              :height (px real-height)}
+      :on-mouse-enter #(<comp-swap! ctx assoc :active-edge-id [node-id target-node-id])
+      :on-mouse-leave #(<comp-swap! ctx assoc :active-edge-id nil)}
      [-hotspot-index {:class "inactive"} (inc idx)]]))
 
 (defn render-hotspots [ctx node]
@@ -137,15 +140,14 @@
           (map-indexed
            (fn [idx hotspot]
              ^{:key idx}
-             [render-hotspot ctx  idx hotspot el-dimensions])
+             [render-hotspot ctx node idx hotspot el-dimensions])
            hotspots)]))))
 
 (defn render [ctx node]
   (let [form-props [:flow-screen (:id node)]
         form-state (forms-ui/form-state> ctx form-props)]
-    (if form-state
-      [render-editable-hotspots ctx form-props form-state]
-      [render-hotspots ctx node])))
+    (when form-state
+      [render-editable-hotspots ctx form-props form-state])))
 
 (def component
   (ui/constructor {:renderer render}))

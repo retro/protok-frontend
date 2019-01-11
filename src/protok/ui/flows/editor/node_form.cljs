@@ -21,7 +21,7 @@
 
 (defelement -form
   :tag :form
-  :class [:p2])
+  :class [:px2 :pt2])
 
 (defelement -form-title
   :class [:fs4 :c-neutral-2 :mb2])
@@ -34,6 +34,18 @@
   :class [:block]
   :style [[:svg {:fill (colors :neutral-4)}]
           [:&:hover [:svg {:fill (colors :blue-4)}]]])
+
+(defelement -outer-buttons-wrap
+  :style [{:position "sticky"
+           :bottom 0}])
+
+(defelement -buttons-gradient
+  :style [{:height "1rem"
+           :background "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%)"}])
+
+(defelement -buttons-wrap
+  :class [:flex :justify-between :bwt1 :bd-neutral-7 :py2 :bg-white]
+  :style [])
 
 (defn render [ctx]
   (let [route             (route> ctx)
@@ -59,21 +71,23 @@
          (icon :close)]]
        (when form-renderer
          [form-renderer ctx form-props])
-       [:div.flex.justify-between.mt2.pt2.bwt1.bd-neutral-7
-        [buttons/dangerous-secondary-small
-         {:on-click    #(<cmd ctx [:flow-editor :delete-node] (:id current-flow-node))
-          :button/pill true
-          :type        :button}
-         "Delete"]
-        [:div.flex.items-center
-         [buttons/link-small
-          {:href (ui/url ctx (dissoc route :node-id))}
-          "Cancel"]
-         [buttons/primary-small
-          {:button/pill true
-           :icon/right  (if submitting? :spinner :arrow-forward)
-           :disabled    submitting?}
-          "Save"]]]])))
+       [-outer-buttons-wrap
+        [-buttons-gradient]
+        [-buttons-wrap
+         [buttons/dangerous-secondary-small
+          {:on-click    #(<cmd ctx [:flow-editor :delete-node] (:id current-flow-node))
+           :button/pill true
+           :type        :button}
+          "Delete"]
+         [:div.flex.items-center
+          [buttons/link-small
+           {:href (ui/url ctx (dissoc route :node-id))}
+           "Cancel"]
+          [buttons/primary-small
+           {:button/pill true
+            :icon/right  (if submitting? :spinner :arrow-forward)
+            :disabled    submitting?}
+           "Save"]]]]])))
 
 (def component
   (ui/constructor {:renderer render

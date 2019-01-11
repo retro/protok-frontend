@@ -58,16 +58,19 @@
         dimensions (map #(get node-dimensions %) ids)]
     (every? (complement nil?) dimensions)))
 
-(defn extract-switch-edges [node]
+(defn extract-switch-edges [nodes node]
   (let [id (:id node)
-        options (:options node)]
+        options (:options node)
+        target-ids (set (s/select [:options s/ALL :targetFlowNode :id] node))
+        target-types (s/select [s/ALL (s/pred #(contains? target-ids (:id %))) :type] nodes)
+        all-screens? (every? #(= "SCREEN" %) target-types)]
     (map-indexed
      (fn [idx o]
        (when-let [to-id (get-in o [:targetFlowNode :id])]
-         {:from id :to to-id :type :switch :index idx}))
+         {:from id :to to-id :type :switch :index idx :weight (if all-screens? 5 1)}))
      options)))
 
-(defn extract-screen-edges [node]
+(defn extract-screen-edges [nodes node]
   (let [id (:id node)
         options (:hotspots node)]
     (map-indexed
@@ -76,23 +79,33 @@
          {:from id :to to-id :type :hotspot :index idx}))
      options)))
 
-(defn extract-edges [node]
+(defn extract-event-edge [nodes node]
+  (let [from (:id node)
+        to (get-in node [:targetFlowNode :id])]
+    (when (and from to)
+      {:from from :to to :type :event})))
+
+(defn extract-edges [nodes node]
   (case (:type node)
-    "EVENT" {:from (:id node) :to (get-in node [:targetFlowNode :id]) :type :event}
-    "SWITCH" (extract-switch-edges node)
-    "SCREEN" (extract-screen-edges node)
+    "EVENT"  (extract-event-edge nodes node) 
+    "SWITCH" (extract-switch-edges nodes node)
+    "SCREEN" (extract-screen-edges nodes node)
     nil))
 
-(defn extract-all-edges [nodes]
-  (filter (complement nil?) (flatten (map extract-edges nodes))))
+(defn extract-all-edges [{:keys [layout]} nodes]
+  (filter (complement nil?) (flatten (map #(extract-edges nodes %) nodes))))
 
-(defn calculate [nodes edges node-dimensions]
-  (let [g (Graph.)]
-    (ocall g :setGraph #js{:nodesep 50 :ranksep 50 :edgesep 50 :rankdir "tb" :align "dl" :marginx (:left min-margins) :marginy (:top min-margins)})
+(defn process-nodes [{:keys [layout]} nodes]
+  nodes)
+
+(defn calculate [options nodes edges node-dimensions]
+  (let [g (Graph.)
+        rankdir (if (= :horizontal (:direction options)) "lr" "tb")]
+    (ocall g :setGraph #js{:nodesep 50 :ranksep 50 :edgesep 50 :rankdir rankdir :align "dl" :marginx (:left min-margins) :marginy (:top min-margins)})
     (doseq [{:keys [id]} nodes]
       (ocall g :setNode id (clj->js (assoc (get node-dimensions id) :label id))))
-    (doseq [{:keys [from to index]} edges] 
-      (ocall g :setEdge from to #js{:index index}))
+    (doseq [{:keys [from to index weight]} edges] 
+      (ocall g :setEdge from to #js{:index index :weight (or weight 1)}))
     (ocall dagre :layout g)
     (let [og (ocall g :graph)]
       (-> {:nodes      (into {} (map (fn [n] [n (js->clj (ocall g :node n) :keywordize-keys true)]) (ocall g :nodes)))
@@ -108,15 +121,16 @@
 (defn update-layout [app-db ctx]
   (let [state-path (get-state-app-db-path ctx)
         state (get-in app-db state-path)
+        options (:options state)
         node-dimensions (:node-dimensions state)
         flow (edb/get-named-item app-db :flow :current)
         nodes-getter (:flowNodes flow)
-        nodes (nodes-getter)
-        edges (extract-all-edges nodes)
-        layout-id (hash [(map :id nodes) edges node-dimensions])]
+        nodes (process-nodes options (nodes-getter))
+        edges (extract-all-edges options nodes)
+        layout-id (hash [(map :id nodes) edges node-dimensions options])]
     (cond
       (= layout-id (get-in state [:layout :id])) app-db
       (not (all-nodes-have-dimensions? nodes node-dimensions)) app-db
       :else (assoc-in app-db (conj state-path :layout) 
                       {:id layout-id
-                       :layout (calculate nodes edges node-dimensions)}))))
+                       :layout (calculate options nodes edges node-dimensions)}))))
