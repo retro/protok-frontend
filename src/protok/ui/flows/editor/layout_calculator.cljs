@@ -4,7 +4,61 @@
             [oops.core :refer [oget ocall oset!]]
             [protok.edb :as edb]
             [com.rpl.specter :as s]
-            [dagre]))
+            [protok.settings :refer [elk-worker-path]]
+            [promesa.core :as p]
+            [clojure.set :as set]
+            [elk]))
+
+(declare a*-seq, next-a*-path, unseen?, step-factory, rpath, cmp-step)
+
+(defn a*
+  "A sequence of paths from `src` to `dest`, shortest first, within the supplied `graph`.
+  If the graph is weighted, supply a `distance` function. To make use of A*, supply a 
+  heuristic function. Otherwise performs like Dijkstra's algorithm."
+  [graph src dest & {:keys [distance heuristic]}]
+  (let [init-adjacent (sorted-set-by cmp-step {:node src :cost 0 :entered 0})]
+    (a*-seq graph dest init-adjacent
+            (or distance (constantly 1))
+            (or heuristic (constantly 0)))))
+
+(defn a*-seq
+  "Construct a lazy sequence of calls to `next-a*-path`, returning the shortest path first."
+  [graph dest adjacent distance heuristic]
+  (lazy-seq
+    (when-let [[path, adjacent'] (next-a*-path graph dest adjacent distance heuristic)]
+      (cons path (a*-seq graph dest adjacent' distance heuristic)))))
+
+(defn next-a*-path [graph dest adjacent f-cost f-heur]
+  (when-let [{:keys [node] :as current} (first adjacent)]
+    (let [path (rpath current)
+          adjacent' (disj adjacent current)] ;; "pop" the current node
+      (if (= node dest)
+        [(reverse path), adjacent']
+        (let [last-idx (or (:entered (last adjacent')) 0)
+              factory (step-factory current last-idx f-cost f-heur dest)
+              xform (comp (filter (partial unseen? path)) (map-indexed factory))
+              adjacent'' (into adjacent' xform (get graph node))]
+          (recur graph dest adjacent'' f-cost f-heur))))))
+
+(defn unseen? [path node]
+  (not-any? #{node} path))
+
+(defn step-factory [parent last-insertion cost heur dest]
+  (fn [insertion-idx node]
+    {:parent parent
+     :node node
+     :entered (+ last-insertion (inc insertion-idx))
+     :cost (+ (:cost parent) (cost (:node parent) node) (heur node dest))}))
+
+(defn rpath [{:keys [node parent]}]
+  (lazy-seq
+    (cons node (when parent (rpath parent)))))
+
+(defn cmp-step [step-a step-b]
+  (let [cmp (compare (:cost step-a) (:cost step-b))]
+    (if (zero? cmp)
+      (compare (:entered step-a) (:entered step-b))
+      cmp)))
 
 (def min-margins
   {:left 50
@@ -51,7 +105,6 @@
   (let [max-index (apply max (filter (complement nil?) (map :index (vals (:edges layout)))))]
     (assoc layout :max-edge-index max-index)))
 
-(def Graph (oget dagre :graphlib.Graph))
 
 (defn all-nodes-have-dimensions? [nodes node-dimensions]
   (let [ids (map :id nodes)
@@ -98,27 +151,136 @@
 (defn process-nodes [{:keys [layout]} nodes]
   nodes)
 
-(defn calculate [options nodes edges node-dimensions]
-  (let [g (Graph.)
-        rankdir (if (= :horizontal (:direction options)) "lr" "tb")]
-    (ocall g :setGraph #js{:nodesep 50 :ranksep 50 :edgesep 50 :rankdir rankdir :align "dl" :marginx (:left min-margins) :marginy (:top min-margins)})
-    (doseq [{:keys [id]} nodes]
-      (ocall g :setNode id (clj->js (assoc (get node-dimensions id) :label id))))
-    (doseq [{:keys [from to index weight]} edges] 
-      (ocall g :setEdge from to #js{:index index :weight (or weight 1)}))
-    (ocall dagre :layout g)
-    (let [og (ocall g :graph)]
-      (-> {:nodes      (into {} (map (fn [n] [n (js->clj (ocall g :node n) :keywordize-keys true)]) (ocall g :nodes)))
-           :edges      (into {} (map (fn [e] 
-                                        (let [id [(oget e :v) (oget e :w)]
-                                              edge (js->clj (ocall g :edge e) :keywordize-keys true)]
-                                          [id (assoc edge :node-ids (set id))])) (ocall g :edges)))
-           :dimensions {:width  (oget og :width)
-                        :height (oget og :height)}}
-          force-margins
-          add-max-edge-index))))
+(def node-types-priority
+  {"SCREEN"   1
+   "SWITCH"   2
+   "EVENT"    3
+   "FLOW_REF" 4})
 
-(defn update-layout [app-db ctx]
+(defn node-type-priority [node]
+  (let [node-type (:type node)]
+    (or (node-types-priority node-type) 999)))
+
+(defn process-elk-node [n]
+  (let [width (:width n)
+        height (:height n)]
+    (-> n
+        (update :x #(+ % (/ width 2)))
+        (update :y #(+ % (/ height 2))))))
+
+(defn process-elk-edge [e]
+  (let [node-ids (vec (js->clj (oget e :nodeIds)))]
+    {:id node-ids 
+     :node-ids (set node-ids)
+     :index (oget e :index)
+     :points (-> (map (fn [s]
+                        [{:x (oget s :startPoint.x)
+                          :y (oget s :startPoint.y)}
+                         (map (fn [p] {:x (oget p :x) :y (oget p :y)}) (oget s :?bendPoints))
+                         {:x (oget s :endPoint.x)
+                          :y (oget s :endPoint.y)}]) (oget e :?sections))
+                 flatten
+                 vec)}))
+
+(defn get-layout-options [options]
+  {"elk.algorithm" "layered"
+   "elk.layered.spacing.nodeNodeBetweenLayers" 25
+   "elk.spacing.edgeNode" 25
+   "elk.layered.spacing.edgeNodeBetweenLayers" 25
+   "elk.layered.spacing.edgeEdgeBetweenLayers" 25
+   ;;"elk.layered.nodePlacement.strategy" "NETWORK_SIMPLEX"
+   ;;"elk.layered.layering.strategy" "COFFMAN_GRAHAM"
+   "elk.direction" (if (= :horizontal (:direction options)) "RIGHT" "DOWN")
+   "elk.edge.thickness" 2
+   "elk.hierarchyHandling" "INCLUDE_CHILDREN"
+   ;;"elk.edgeRouting" "POLYLINE"
+   "lk.layered.nodePlacement.favorStraightEdges" false
+   "elk.layered.nodePlacement.bk.fixedAlignment" "BALANCED"
+  ;; "elk.layered.crossingMinimization.hierarchicalSweepiness" 1
+   "elk.partitioning.activate" true})
+
+
+(defn entrypoint? [node]
+  (:isEntrypoint node))
+
+(defn get-entrypoint [nodes]
+  (first (filter entrypoint? nodes)))
+
+(defn edge->elk-edge [{:keys [from to index]}]
+  {:id (str from "/" to "/" (or index "_"))
+   :sources [from]
+   :targets [to]
+   :index index
+   :nodeIds [from to]})
+
+(defn node->elk-node [node-dimensions {:keys [id priority]}]
+  (-> (get node-dimensions id)
+      (assoc :id id)
+      (assoc-in [:layoutOptions "elk.partitioning.partition"] priority)))
+
+(defn adjust-coordinates [{:keys [x y]} nodes]
+  (map 
+   (fn [n]
+     (-> n
+         (update :x + x)
+         (update :y + y)))
+   nodes))
+
+(defn get-nodes [parent]
+  (let [parent-x (oget parent :x)
+        parent-y (oget parent :y)]
+    (->> (js->clj (oget parent :children) :keywordize-keys true)
+         (adjust-coordinates {:x parent-x :y parent-y})
+         (map process-elk-node))))
+
+(defn adjust-edge-coordinates [coordinates edge]
+  (update edge :points #(adjust-coordinates coordinates %)))
+
+(defn get-edges [parent]
+  (let [edges (vec (oget parent :edges))
+        parent-x (oget parent :x)
+        parent-y (oget parent :y)] 
+    (->> edges
+         (map process-elk-edge)
+         (map #(adjust-edge-coordinates {:x parent-x :y parent-y} %))
+         )))
+
+(defn elk-calculate [options nodes edges node-dimensions]
+  (let [entrypoint (or (get-entrypoint nodes) (first nodes))
+        entrypoint-id (:id entrypoint)
+        entrypoint-edges (filter #(or (= (:from %) entrypoint-id) (= (:to %) entrypoint-id)) edges)
+        nodes' (remove #(= entrypoint %) nodes)
+        edges' (filter #(not (or (= (:from %) entrypoint-id) (= (:to %) entrypoint-id))) edges)
+        g {:id "root"
+           :layoutOptions (get-layout-options options)
+           :children (map #(node->elk-node node-dimensions %) nodes)
+           :edges (map edge->elk-edge edges)}
+        e (elk. #js{:workerUrl elk-worker-path})]
+    ;;(l/pp g)
+    (->> (ocall e :layout (clj->js g))
+         (p/map (fn [res]
+                  (let [edges (vec (oget res :edges))]
+                    (-> {:nodes (into {} (map (fn [n] [(:id n) n]) (get-nodes res)))
+                         :edges (into {} (map (fn [e] [(:id e) e]) (concat (get-edges res))))
+                         :dimensions {:height (+ 50 (oget res :height))
+                                      :width (+ 50 (oget res :width))}}
+                        add-max-edge-index
+                        force-margins))))
+         (p/error (fn [e]
+                    (println e))))))
+
+(defn sort-nodes [nodes edges]
+  (let [entrypoint (or (get-entrypoint nodes) (first nodes))
+        entrypoint-id (:id entrypoint)
+        graph (reduce (fn [acc {:keys [from to]}] 
+                        (assoc acc from (set/union (acc from) #{to})))
+                      {} edges)]
+    (->> nodes
+         (map (fn [n] (assoc n :priority (count (first (a* graph entrypoint-id (:id n)))))))
+         ;;(sort-by #(node-type-priority %))
+         )))
+
+(defn get-layout [app-db ctx]
   (let [state-path (get-state-app-db-path ctx)
         state (get-in app-db state-path)
         options (:options state)
@@ -127,10 +289,9 @@
         nodes-getter (:flowNodes flow)
         nodes (process-nodes options (nodes-getter))
         edges (extract-all-edges options nodes)
-        layout-id (hash [(map :id nodes) edges node-dimensions options])]
+        layout-id (hash [(map (fn [n] [(:id n) (:isEntrypoint n)]) nodes) edges node-dimensions options])]
     (cond
-      (= layout-id (get-in state [:layout :id])) app-db
-      (not (all-nodes-have-dimensions? nodes node-dimensions)) app-db
-      :else (assoc-in app-db (conj state-path :layout) 
-                      {:id layout-id
-                       :layout (calculate options nodes edges node-dimensions)}))))
+      (= layout-id (get-in state [:layout :id])) nil
+      (not (all-nodes-have-dimensions? nodes node-dimensions)) nil
+      :else (->> (elk-calculate options (sort-nodes nodes edges) edges node-dimensions)
+                 (p/map (fn [l] {:id layout-id :layout l}))))))

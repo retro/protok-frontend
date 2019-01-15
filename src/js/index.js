@@ -5,6 +5,7 @@ import {PathLine} from "react-svg-pathline";
 import Dagre from "dagre";
 import {Rnd} from "react-rnd";
 import ReactModal from "react-modal";
+import Elk from "elkjs/lib/elk-api.js";
 
 window.React = React;
 window.ReactDOM = ReactDOM;
@@ -13,3 +14,4 @@ window.ReactSvgPathline = PathLine;
 window.ReactRnd = Rnd;
 window.ReactModal = ReactModal;
 window.Dagre = Dagre;
+window.Elk = Elk;

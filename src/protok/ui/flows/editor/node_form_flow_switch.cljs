@@ -24,6 +24,8 @@
        :placeholder "Name"}]
      [inputs/textarea ctx form-props :description
       {:label "Description"}]
+     [inputs/checkbox ctx form-props :isEntrypoint
+      {:label "Flow Entrypoint"}]
      [:div.bwt1.bd-neutral-7.mt2.pt2
       [-form-subtitle "Options"]
       (map-indexed
@@ -33,7 +35,7 @@
        options)
       [:div.flex.justify-end
        [buttons/secondary-small
-        {:on-click #(forms-ui/<set-value ctx form-props :options (conj options {}))
+        {:on-click #(forms-ui/<set-value ctx form-props :options (conj options {:name ""}))
          :type :button
          :button/pill true}
         "Add Option"]]]]))

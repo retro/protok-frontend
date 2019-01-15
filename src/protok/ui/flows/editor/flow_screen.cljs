@@ -45,7 +45,7 @@
   (let [pf-getter (:projectFile node)
         pf (when pf-getter (pf-getter))
         progress (:protok/progress pf)
-        active-node-id (:active-node-id (route> ctx))]
+        active-node-id (:node-id (route> ctx))]
     [-wrap
      [-name-wrap {:class (when pf :bwb1)} (:name node)]
      (when pf 

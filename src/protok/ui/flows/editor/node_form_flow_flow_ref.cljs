@@ -19,7 +19,10 @@
 (defn render [ctx form-props]
   (let [current-flow-id (:id (route> ctx))
         flows (sort-by :name (filter #(not= current-flow-id (:id %)) (sub> ctx :flows)))]
-    [inputs/select ctx form-props [:targetFlow :id]
-     {:label "Target Flow"
-      :placeholder "Select Target Flow"
-      :options (map (fn [f] {:value (:id f) :label (:name f)}) flows)}]))
+    [:<>
+     [inputs/select ctx form-props [:targetFlow :id]
+      {:label "Target Flow"
+       :placeholder "Select Target Flow"
+       :options (map (fn [f] {:value (:id f) :label (:name f)}) flows)}]
+     [inputs/checkbox ctx form-props :isEntrypoint
+      {:label "Flow Entrypoint"}]]))

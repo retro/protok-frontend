@@ -6,7 +6,7 @@
             [reagent.core :as r]
             [oops.core :refer [ocall oget]]
             [protok.styles.colors :refer [colors]]
-            [keechma.toolbox.entangled.ui :refer [<comp-swap!]]))
+            [keechma.toolbox.entangled.ui :refer [<comp-swap! <comp-cmd]]))
 
 (defn px [v]
   (str v "px"))
@@ -123,8 +123,8 @@
               :left (px real-left)
               :width (px real-width)
               :height (px real-height)}
-      :on-mouse-enter #(<comp-swap! ctx assoc :active-edge-id [node-id target-node-id])
-      :on-mouse-leave #(<comp-swap! ctx assoc :active-edge-id nil)}
+      :on-mouse-enter #(<comp-cmd ctx :highlight-edge [node-id target-node-id])
+      :on-mouse-leave #(<comp-cmd ctx :highlight-edge nil)}
      [-hotspot-index {:class "inactive"} (inc idx)]]))
 
 (defn render-hotspots [ctx node]

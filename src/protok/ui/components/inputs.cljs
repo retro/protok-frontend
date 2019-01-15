@@ -6,7 +6,8 @@
             [protok.styles.colors :refer [colors]]
             [keechma.toolbox.css.core :refer-macros [defelement]]
             [keechma.toolbox.util :refer [class-names]]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [oops.core :refer [oget]]))
 
 (def text-inputs-class
   [:block :w100p :rounded :bd-neutral-7 :bw1 :c-neutral-2])
@@ -212,4 +213,19 @@
              :key value} 
             label]) 
          (sort-by :label options)))]
+     [render-errors (forms-ui/errors-in> ctx form-props attr)]]))
+
+(defn checkbox [ctx form-props attr {:keys [class] :as input-props}]
+  (let [errors (forms-ui/errors-in> ctx form-props attr)
+        input-size (or (:input/size input-props) :normal)]
+    [-fieldset
+     [:label.fs2.c-neutral-3.block
+      [:input.mr1
+       {:placeholder (get-placeholder input-props)
+        :on-change #(forms-ui/<set-value ctx form-props attr (oget % :target.checked))
+        :value (boolean (forms-ui/value-in> ctx form-props attr))
+        :type "checkbox"
+        :class (class-names {:has-errors (seq errors)
+                             (process-classes class) true})}]
+      (get-label input-props)]
      [render-errors (forms-ui/errors-in> ctx form-props attr)]]))

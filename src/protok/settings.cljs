@@ -6,3 +6,5 @@
     "https://protok-staging.herokuapp.com/graphql"))
 
 (def jwt-ls-name "protok-jwt")
+
+(def elk-worker-path "./js/elk-worker.min.js");

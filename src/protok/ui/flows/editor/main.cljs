@@ -149,34 +149,37 @@
   (let [marker-start (if-let [index (:index edge)]
                        (str "edge-circle-" index)
                        "edge-circle")]
-    [pathline {:points (:points edge)
-               :stroke-width 2 
-               :stroke "rgba(0,0,0,0)" 
-               :fill "none"
-               :marker-end "url(#edge-arrow)"
-               :marker-start (str "url(#" marker-start ")")
-               :r 20
-               :stroke-linecap "round"}]))
+    (when-let [points (seq (:points edge))]
+      [pathline {:points points
+                 :stroke-width 2 
+                 :stroke "rgba(0,0,0,0)" 
+                 :fill "none"
+                 :marker-end "url(#edge-arrow)"
+                 :marker-start (str "url(#" marker-start ")")
+                 :r 3
+                 :stroke-linecap "round"}])))
 
 (defn render-active-edge [id edge]
   (let [marker-start (if-let [index (:index edge)]
                        (str "active-edge-circle-" index)
                        "active-edge-circle")]
-    [pathline {:points (:points edge)
-               :stroke-width 2 
-               :stroke (edge-colors :active) 
-               :fill "none"
-               :marker-end "url(#active-edge-arrow)"
-               :marker-start (str "url(#" marker-start ")")
-               :r 20
-               :stroke-linecap "round"}]))
+    (when-let [points (seq (:points edge))]
+      [pathline {:points points
+                 :stroke-width 2 
+                 :stroke (edge-colors :active) 
+                 :fill "none"
+                 :marker-end "url(#active-edge-arrow)"
+                 :marker-start (str "url(#" marker-start ")")
+                 :r 3
+                 :stroke-linecap "round"}])))
 
 (defn render-edge-bg [id edge edge-color]
-  [pathline {:points (:points edge)
-             :stroke-width 2 
-             :stroke edge-color 
-             :fill "none"
-             :r 20}])
+  (when-let [points (seq (:points edge))]
+    [pathline {:points points
+               :stroke-width 2 
+               :stroke edge-color 
+               :fill "none"
+               :r 3}]))
 
 (defn render-markers
   ([max-edge-index marker-color] (render-markers max-edge-index marker-color "edge"))
@@ -204,11 +207,11 @@
        [:marker {:id (str prefix "-circle-" idx)
                  :markerWidth 18
                  :markerHeight 18
-                 :refX 9
-                 :refY 9
-                 :viewBox "0 0 37 37"}
-        [:circle {:r 9 :cx 9 :cy 9 :fill marker-color}]
-        [:text {:x 9 :y 13 :fill "white" :font-size "12" :font-weight "bold" :width 33 :text-anchor "middle"} (inc idx)]])
+                 :refX 10
+                 :refY 10
+                 :viewBox "0 0 39 39"}
+        [:circle {:r 9 :cx 11 :cy 10 :stroke-width 2 :stroke marker-color :fill "white"}]
+        [:text {:x 11 :y 14 :fill marker-color :font-size "13" :font-weight "bold" :width 33 :text-anchor "middle"} (inc idx)]])
      (range (inc max-edge-index)))]))
 
 (defn render-svg [ctx state]
@@ -227,7 +230,6 @@
         edge-color     (if (seq active-edges) (edge-colors :inactive) (edge-colors :default))
         max-edge-index (:max-edge-index layout)]
 
-    
     [:svg.mx-auto.block {:viewBox (str "0 0 " width " " height) :width width :height height}
      [:defs
       [render-markers max-edge-index edge-color]

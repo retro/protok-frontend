@@ -11,7 +11,8 @@
             [protok.gql :as gql]
             [promesa.core :as p]
             [protok.edb :as edb]
-            [protok.ui.flows.editor.layout-calculator :as layout-calculator])
+            [protok.ui.flows.editor.layout-calculator :as layout-calculator]
+            [protok.util :refer [delay-pipeline]])
   (:import [goog.async Throttle]))
 
 (defn current-flow-id [app-db]
@@ -81,8 +82,11 @@
    :on-state-change (pipeline! [value app-db ctx]
                       (epp/comp-execute! :calculate-layout))
    :calculate-layout (pipeline! [value app-db ctx]
-                       (pp/commit! (layout-calculator/update-layout app-db ctx))
-                       (center-node app-db ctx))
+                       (layout-calculator/get-layout app-db ctx)
+                       (when value
+                         (pipeline! [value app-db ctx]
+                           (epp/comp-swap! assoc :layout value)
+                           (center-node app-db ctx))))
    :route-changed (pipeline! [value app-db ctx]
                     (center-node app-db ctx))
    :create-node (pipeline! [value app-db ctx]
@@ -91,4 +95,8 @@
                     (pipeline! [value app-db ctx]
                       (pp/commit! (add-node-to-current-flow app-db (:node value)))
                       (when (:redirect-after? value)
-                        (pp/redirect! (assoc (get-in app-db [:route :data]) :node-id (get-in value [:node :id])))))))})
+                        (pp/redirect! (assoc (get-in app-db [:route :data]) :node-id (get-in value [:node :id])))))))
+   :highlight-edge (pp/exclusive
+                    (pipeline! [value app-db ctx]
+                      (delay-pipeline 100)
+                      (epp/comp-swap! assoc :active-edge-id value)))})

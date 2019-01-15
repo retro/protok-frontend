@@ -1,4 +1,4 @@
-.PHONY : deploy deploy-production netlify-deploy netlify-deploy-production build-prod-cljs build-prod-js-deps build-dev-js-deps run-dev-server develop
+.PHONY : deploy deploy-production netlify-deploy netlify-deploy-production build-prod-cljs build-prod-js-deps build-dev-js-deps run-dev-server develop copy-elk-worker
 
 build-dev-js-deps :
 	yarn
@@ -15,7 +15,7 @@ build-prod-cljs :
 	lein clean
 	lein cljsbuild once min
 
-develop : build-dev-js-deps run-dev-server
+develop : build-dev-js-deps copy-elk-worker run-dev-server
 
 netlify-deploy :
 	netlify deploy --dir resources/public
@@ -23,6 +23,9 @@ netlify-deploy :
 netlify-deploy-production :
 	netlify deploy --prod --dir resources/public
 
-deploy : build-prod-js-deps build-prod-cljs netlify-deploy
+copy-elk-worker :
+	yes | cp -rf node_modules/elkjs/lib/elk-worker.min.js resources/public/js/elk-worker.min.js
 
-deploy-production : build-prod-js-deps build-prod-cljs netlify-deploy-production
+deploy : build-prod-js-deps copy-elk-worker build-prod-cljs netlify-deploy
+
+deploy-production : build-prod-js-deps copy-elk-worker build-prod-cljs netlify-deploy-production

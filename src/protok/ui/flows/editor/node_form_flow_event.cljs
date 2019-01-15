@@ -22,4 +22,6 @@
      :placeholder "Name"}]
    [inputs/textarea ctx form-props :description
     {:label "Description"}]
+   [inputs/checkbox ctx form-props :isEntrypoint
+    {:label "Flow Entrypoint"}]
    [flow-node-select ctx form-props :targetFlowNode.id]])

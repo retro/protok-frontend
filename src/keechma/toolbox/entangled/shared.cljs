@@ -15,3 +15,8 @@
 
 (defn get-state-app-db-path [ctx]
   (vec (conj (get-app-db-path ctx) :state)))
+
+(defn swap-comp-state [state args]
+  (let [f (first args)
+        args (concat [state] (rest args))]
+    (apply f args)))

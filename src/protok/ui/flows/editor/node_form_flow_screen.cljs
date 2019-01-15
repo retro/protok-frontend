@@ -105,6 +105,8 @@
        :placeholder "Name"}]
      [inputs/textarea ctx form-props :description
       {:label "Description"}]
+     [inputs/checkbox ctx form-props :isEntrypoint
+      {:label "Flow Entrypoint"}]
      (when project-file
        [-screen-img-wrap
         [-screen-img {:src (project-files/url project-file)}]
@@ -133,7 +135,7 @@
         hotspots)]
       [:div.flex.justify-end
        [buttons/secondary-small
-        {:on-click #(forms-ui/<set-value ctx form-props :hotspots (conj hotspots {}))
+        {:on-click #(forms-ui/<set-value ctx form-props :hotspots (conj hotspots {:name ""}))
          :type :button
          :button/pill true}
         "Add Hotspot"]]]]))

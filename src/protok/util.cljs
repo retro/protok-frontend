@@ -1,6 +1,7 @@
 (ns protok.util
   (:require [clojure.string :as str]
-            [goog.crypt :refer [byteArrayToHex]])
+            [goog.crypt :refer [byteArrayToHex]]
+            [promesa.core :as p])
   (:import goog.crypt.Md5))
 
 (defn select-keys-by-namespace
@@ -23,3 +24,8 @@
   [coll pos]
   (vec (concat (subvec coll 0 pos) (subvec coll (inc pos)))))
 
+
+(defn delay-pipeline
+  ([] (delay-pipeline 0))
+  ([msec]
+   (p/promise #(js/setTimeout %1 msec))))

@@ -3,16 +3,11 @@
             [keechma.toolbox.pipeline.controller :as pp-controller]
             [keechma.controller :as controller]
             [cljs.core.async :refer [<! put!]]
-            [keechma.toolbox.entangled.shared :refer [id ComponentCommand ->ComponentCommand]]
+            [keechma.toolbox.entangled.shared :refer [id ComponentCommand ->ComponentCommand swap-comp-state]]
             [promesa.core :as p]
             [medley.core :refer [dissoc-in]]
             [keechma.toolbox.entangled.pipeline :as epp])
   (:require-macros [cljs.core.async.macros :refer [go-loop]]))
-
-(defn swap-comp-state [state args]
-  (let [f (first args)
-        args (concat [state] (rest args))]
-    (apply f args)))
 
 (def default-pipelines
   {:keechma.toolbox.entangled.actions/reset

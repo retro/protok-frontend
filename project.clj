@@ -7,6 +7,7 @@
                 "react-svg-pathline"
                 "react-rnd"
                 "react-modal"
+                "elk"
                 "dagre"]
 
      :global-exports {react                 React
@@ -15,6 +16,7 @@
                       react-svg-pathline    ReactSvgPathline
                       react-rnd             ReactRnd
                       react-modal           ReactModal
+                      elk                   Elk
                       dagre                 Dagre}}])
 
 

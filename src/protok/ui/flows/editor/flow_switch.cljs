@@ -1,6 +1,6 @@
 (ns protok.ui.flows.editor.flow-switch
   (:require [keechma.toolbox.css.core :refer-macros [defelement]]
-            [keechma.toolbox.entangled.ui :refer [<comp-swap!]]))
+            [keechma.toolbox.entangled.ui :refer [<comp-cmd]]))
 
 (defelement -wrap
   :class [:fs1 :c-neutral-2 :p1])
@@ -31,8 +31,8 @@
            (let [target-node-id (get-in o [:targetFlowNode :id])]
              ^{:key id}
              [-option-item
-              {:on-mouse-enter #(<comp-swap! ctx assoc :active-edge-id [node-id target-node-id])
-               :on-mouse-leave #(<comp-swap! ctx assoc :active-edge-id nil)}
+              {:on-mouse-enter #(<comp-cmd ctx :highlight-edge [node-id target-node-id])
+               :on-mouse-leave #(<comp-cmd ctx :highlight-edge nil)}
               [-option-idx (inc idx)]
               name]))
          options)])]))

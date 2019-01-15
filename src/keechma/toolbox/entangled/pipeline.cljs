@@ -1,6 +1,6 @@
 (ns keechma.toolbox.entangled.pipeline
   (:require [keechma.toolbox.pipeline.core :as pp :refer [ISideffect]]
-            [keechma.toolbox.entangled.shared :as shared :refer [id ->ComponentCommand]]
+            [keechma.toolbox.entangled.shared :as shared :refer [id ->ComponentCommand swap-comp-state]]
             [keechma.controller :as controller]))
 
 (def get-app-db-path shared/get-app-db-path)
@@ -35,6 +35,13 @@
     (let [component-id (get-id (:context controller))]
       (controller/execute controller cmd (->ComponentCommand component-id args)))))
 
+(defrecord ComponentSwapSideffect [args]
+  ISideffect
+  (call! [_ controller app-db-atom _]
+    (let [state-app-db-path (get-state-app-db-path (:context controller))
+          state (get-in @app-db-atom state-app-db-path)]
+      (swap! app-db-atom assoc-in state-app-db-path (swap-comp-state state args)))))
+
 (defn comp-commit! [data]
   (->ComponentCommitSideffect data))
 
@@ -42,3 +49,6 @@
   ([cmd] (comp-execute! cmd nil))
   ([cmd args]
    (->ComponentExecuteSideffect cmd args)))
+
+(defn comp-swap! [& args]
+  (->ComponentSwapSideffect args))
