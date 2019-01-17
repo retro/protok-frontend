@@ -31,3 +31,10 @@
       (on-page "flows")))
 
 (def request-login-code #(when (= "login" (:page %)) :form))
+
+(def invite-organization-member
+   (-> (fn [route _]
+         (match [route]
+           [{:subpage "edit" :id id}] id
+           :else nil))
+      (on-page "organizations")))

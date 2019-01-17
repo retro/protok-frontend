@@ -8,6 +8,7 @@
             [protok.forms.flow-flow-ref :as flow-flow-ref]
             [protok.forms.flow-screen :as flow-screen]
             [protok.forms.flow-switch :as flow-switch]
+            [protok.forms.invite-organization-member :as invite-organization-member]
             [protok.domain.form-ids :as form-ids]
             [protok.util.forms :refer [provide]]))
 
@@ -38,4 +39,7 @@
    (provide flow-screen/constructor)
 
    :flow-switch
-   (provide flow-switch/constructor)})
+   (provide flow-switch/constructor)
+
+   :invite-organization-member
+   (provide invite-organization-member/constructor form-ids/invite-organization-member)})

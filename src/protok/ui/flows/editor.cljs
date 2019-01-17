@@ -62,10 +62,10 @@
 
 (defn render [ctx state]
     (when (:initialized? state)
-      (let [nodes-getter (get-in state [:flow :flowNodes])]
+      (let [nodes-getter (get-in state [:flow :flowNodes])
+            route (route> ctx)]
         (if (and nodes-getter (seq (nodes-getter)))
-          [-wrap
-           [main/render ctx state]]
+          [-wrap [main/render ctx state]]
           [render-empty-state ctx state]))))
 
 (defn state-provider [ctx local-state args]

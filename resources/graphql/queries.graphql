@@ -60,6 +60,13 @@ fragment organizationData on Organization {
   membership {
     memberRole
   }
+  memberships {
+    memberRole
+    account {
+      id
+      email
+    }
+  }
 }
 
 query FetchOrganizationProjects($id: ID!) {
@@ -331,4 +338,10 @@ mutation DeleteFlowSwitchOption($id: ID!) {
 
 mutation DeleteFlowScreenHotspot($id: ID!) {
   deleteFlowScreenHotspot(id:$id)
+}
+
+mutation InviteOrganizationMember($organizationId:ID!, $email: String!){
+  inviteOrganizationMember(organizationId: $organizationId, email:$email) {
+    memberRole
+  }
 }
