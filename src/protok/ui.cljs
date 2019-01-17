@@ -11,6 +11,7 @@
             [protok.ui.flows.form :as flows-form]
             [protok.ui.flows.editor :as flows-editor]
             [protok.ui.flows.editor.node-form :as flows-editor-node-form]
+            [protok.ui.flows.editor.node-details :as flows-editor-node-details]
             [protok.ui.flows.editor.node-form-flow-screen-hotspots :as flows-editor-node-form-flow-screen-hotspots]
             [protok.ui.loading :as loading]
             [protok.ui.components.layout :as layout]
@@ -30,6 +31,7 @@
    :flows/form                           flows-form/component
    :flows/editor                         flows-editor/component
    :flows/node-form                      flows-editor-node-form/component
+   :flows/node-details                   flows-editor-node-details/component
    :flows/node-form-flow-screen-hotspots flows-editor-node-form-flow-screen-hotspots/component
    :component/layout                     layout/component
    :component/content-layout             content-layout/component})

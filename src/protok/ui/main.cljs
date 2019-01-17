@@ -102,6 +102,10 @@
       {:component :flows/editor
        :path      [path-current-organization path-current-project path-current-flow]}
       
+      [{:page "flows" :subpage "view" :id _}]         
+       {:component :flows/editor
+        :path      [path-current-organization path-current-project path-current-flow]}
+
       :else :not-found)))
 
 (defn render [ctx]

@@ -62,9 +62,9 @@
 (defn scrollable? [val]
   (< scroll-movement-per-frame (ocall js/Math :abs val)))
 
-(defn center-node [app-db ctx]
+(defn center-node [node-id app-db ctx]
   (let [comp-state (get-in app-db (get-state-app-db-path ctx))
-        node-id (get-in app-db [:route :data :node-id])
+        ;;node-id (get-in app-db [:route :data :node-id])
         el (ocall js/document :getElementById (:editor-el comp-state))
         layout (get-in comp-state [:layout :layout])]
     (when (and el layout node-id)
@@ -120,7 +120,7 @@
                     (epp/comp-execute! :center-node))
    :center-node (pipeline! [value app-db ctx]
                   (delay-pipeline 50)
-                  (center-node app-db ctx))
+                  (center-node (or value (get-in app-db [:route :data :node-id])) app-db ctx))
    :create-node (pipeline! [value app-db ctx]
                   (create-node! app-db value)
                   (when value

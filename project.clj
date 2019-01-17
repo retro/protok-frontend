@@ -7,8 +7,8 @@
                 "react-svg-pathline"
                 "react-rnd"
                 "react-modal"
-                "elk"
-                "dagre"]
+                "react-markdown"
+                "elk"]
 
      :global-exports {react                 React
                       react-dom             ReactDOM
@@ -16,8 +16,8 @@
                       react-svg-pathline    ReactSvgPathline
                       react-rnd             ReactRnd
                       react-modal           ReactModal
-                      elk                   Elk
-                      dagre                 Dagre}}])
+                      react-markdown        ReactMarkdown
+                      elk                   Elk}}])
 
 
 (defproject protok "0.1.0-SNAPSHOT"

@@ -76,19 +76,24 @@
                  :height "18px"
                  :display "block"}]])
 
-(defn render-node-header [ctx node]
-  (let [route (route> ctx)
-        id (:id node)
+(defn get-header-link-props [ctx node]
+  (let [route        (route> ctx)
+        id           (:id node)
         active-node? (= id (:node-id route))
-        edit-link-props (if active-node?
-                          {:label "Close" :url (dissoc route :node-id)}
-                          {:label "Edit" :url (assoc route :node-id id)})]
-    [-node-header-wrap
-     [-node-header-icons-wrap
-      (node-type-icon (:type node))]
+        editing?     (= "edit" (:subpage route))]
+    (cond
+      active-node? {:label "Close" :url (dissoc route :node-id)}
+      editing?     {:label "Edit" :url (assoc route :node-id id)}
+      :else        {:label "Details" :url (assoc route :node-id id)})))
+
+(defn render-node-header [ctx node]
+  [-node-header-wrap
+   [-node-header-icons-wrap
+    (node-type-icon (:type node))]
+   (when-let [header-link-props (get-header-link-props ctx node)]
      [-node-header-link
-      {:href (ui/url ctx (:url edit-link-props))}
-      (:label edit-link-props)]]))
+      {:href (ui/url ctx (:url header-link-props))}
+      (:label header-link-props)])])
 
 (defn get-active-nodes [state]
   (let [edges (get-in state [:layout :layout :edges])
@@ -254,8 +259,11 @@
   :style [{:width sidebar-width}])
 
 (defn render-sidebar [ctx state]
-  [-sidebar-wrap
-   [(ui/component ctx :flows/node-form)]])
+  (let [editing? (= "edit" (:subpage (route> ctx)))]
+    [-sidebar-wrap
+     (if editing?
+       [(ui/component ctx :flows/node-form)]
+       [(ui/component ctx :flows/node-details)])]))
 
 (defelement -wrap
   :style [[:.protok_ui_flows_editor_main--editor-wrap
@@ -323,7 +331,7 @@
             :color (colors :white)
             :z-index 1}]])
 
-(defn render-menu [ctx state]
+(defn render-editor-menu [ctx state]
   (let [active-graph-options (:options state)]
     [-menu-wrap
      [-menu-group-wrap
@@ -358,6 +366,33 @@
                   (:label o)]))
              (:options g))]]))
       graph-options)]))
+
+(defn render-viewer-menu [ctx state]
+  (let [active-graph-options (:options state)]
+    [-menu-wrap 
+     (map 
+      (fn [g]
+        (let [option-id (:id g)]
+          ^{:key option-id}
+          [-menu-group-wrap
+           (when-let [label (:label g)]
+             [-menu-group-label label])
+           [-menu-group-buttons-wrap
+            (map
+             (fn [o]
+               (let [option-value (:value o)]
+                 ^{:key option-value}
+                 [-menu-group-button
+                  {:on-click #(<comp-swap! ctx assoc-in [:options option-id] option-value)
+                   :class (class-names {:active (= option-value (get active-graph-options option-id))})}
+                  (:label o)]))
+             (:options g))]]))
+      graph-options)]))
+
+(defn render-menu [ctx state]
+  (if (= "edit" (:subpage (route> ctx)))
+    [render-editor-menu ctx state]
+    [render-viewer-menu ctx state]))
 
 
 (defn render [ctx state]

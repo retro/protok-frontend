@@ -82,6 +82,7 @@
         :state-provider state-provider
         :subscription-deps [:current-flow]
         :component-deps [:flows/node-form
+                         :flows/node-details
                          :flows/node-form-flow-screen-hotspots]}
        actions)
       (assoc :protok/config {:layout :bare})))

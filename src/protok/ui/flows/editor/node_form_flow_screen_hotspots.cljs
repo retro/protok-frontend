@@ -1,12 +1,13 @@
 (ns protok.ui.flows.editor.node-form-flow-screen-hotspots
   (:require [keechma.ui-component :as ui]
-            [keechma.toolbox.css.core :refer [defelement]]
+            [keechma.toolbox.css.core :refer-macros [defelement]]
             [keechma.toolbox.forms.ui :as forms-ui]
             [protok.react :refer [resize-detector rnd]]
             [reagent.core :as r]
             [oops.core :refer [ocall oget]]
             [protok.styles.colors :refer [colors]]
-            [keechma.toolbox.entangled.ui :refer [<comp-swap! <comp-cmd]]))
+            [keechma.toolbox.entangled.ui :refer [<comp-swap! <comp-cmd]]
+            [keechma.toolbox.ui :refer [route>]]))
 
 (defn px [v]
   (str v "px"))
@@ -20,12 +21,16 @@
                       :transform "scale(1)"}]]])
 
 (defelement -hotspot
-  :class [:absolute :bw2]
+  :class [:absolute :bw2 :pointer]
   :style [[:&.active
            {:background-color "rgba(25,146,212,0.5)"
             :border-color (colors :blue-3)}]
           [:&.inactive 
-           {:border-color (colors :neutral-5)}]])
+           {:border-color (colors :neutral-5)}
+           [:&:hover
+            {:border-color (colors :blue-3)}
+            [:.protok_ui_flows_editor_node_form_flow_screen_hotspots--hotspot
+             {:background (colors :blue-3)}]]]])
 
 (defelement -hotspot-index
   :class [:absolute :c-white :center :fs0 :bold]
@@ -105,29 +110,34 @@
           hotspots)]))))
 
 (defn render-hotspot [ctx node idx hotspot el-dimensions]
-  (let [width     (or (get-in hotspot [:dimensions :width]) 0.5)
-        height    (or (get-in hotspot [:dimensions :height]) 0.1)
-        top       (or (get-in hotspot [:coordinates :top]) 0.1)
-        left      (or (get-in hotspot [:coordinates :left]) 0.1)
-        el-width  (:width el-dimensions)
-        el-height (:height el-dimensions)
-        real-left (* left el-width)
-        real-top  (* top el-height)
-        real-width (* width el-width)
-        real-height (* height el-height)
-        node-id (:id node)
-        target-node-id (get-in hotspot [:targetFlowNode :id])]
+  (let [width          (or (get-in hotspot [:dimensions :width]) 0.5)
+        height         (or (get-in hotspot [:dimensions :height]) 0.1)
+        top            (or (get-in hotspot [:coordinates :top]) 0.1)
+        left           (or (get-in hotspot [:coordinates :left]) 0.1)
+        el-width       (:width el-dimensions)
+        el-height      (:height el-dimensions)
+        real-left      (* left el-width)
+        real-top       (* top el-height)
+        real-width     (* width el-width)
+        real-height    (* height el-height)
+        node-id        (:id node)
+        target-node-id (get-in hotspot [:targetFlowNode :id])
+        route          (route> ctx)
+        editing?       (= "edit" (:subpage route))]
     [-hotspot
-     {:class "inactive"
-      :style {:top (px real-top)
-              :left (px real-left)
-              :width (px real-width)
-              :height (px real-height)}
+     {:class          "inactive"
+      :style          {:top    (px real-top)
+                       :left   (px real-left)
+                       :width  (px real-width)
+                       :height (px real-height)}
       :on-mouse-enter #(<comp-cmd ctx :highlight-edge [node-id target-node-id])
-      :on-mouse-leave #(<comp-cmd ctx :highlight-edge nil)}
+      :on-mouse-leave #(<comp-cmd ctx :highlight-edge nil)
+      :on-click       (if editing?
+                        #(<comp-cmd ctx :center-node target-node-id)
+                        #(ui/redirect ctx (assoc route :node-id target-node-id)))}
      [-hotspot-index {:class "inactive"} (inc idx)]]))
 
-(defn render-hotspots [ctx node]
+ (defn render-hotspots [ctx node]
    (let [el-dimensions$ (r/atom nil)]
      (fn [ctx node]
        (let [hotspots (:hotspots node) 

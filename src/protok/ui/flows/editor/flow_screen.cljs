@@ -45,7 +45,9 @@
   (let [pf-getter (:projectFile node)
         pf (when pf-getter (pf-getter))
         progress (:protok/progress pf)
-        active-node-id (:node-id (route> ctx))]
+        route (route> ctx)
+        active-node-id (:node-id route)
+        editing? (= "edit" (:subpage route))]
     [-wrap
      [-name-wrap {:class (when pf :bwb1)} (:name node)]
      (when pf 
@@ -55,6 +57,6 @@
           [-img-progress-wrap
            [-img-progress-inner-wrap
             [-img-progress {:style {:width (str (* 100 progress) "%")}}]]])
-        (if active-node-id
+        (if (and active-node-id editing?)
           [(ui/component ctx :flows/node-form-flow-screen-hotspots) node]
           [render-hotspots ctx node])])]))
