@@ -65,8 +65,7 @@
       (let [nodes-getter (get-in state [:flow :flowNodes])]
         (if (and nodes-getter (seq (nodes-getter)))
           [-wrap
-           [main/render ctx state]
-           ]
+           [main/render ctx state]]
           [render-empty-state ctx state]))))
 
 (defn state-provider [ctx local-state args]

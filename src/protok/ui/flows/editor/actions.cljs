@@ -59,6 +59,9 @@
 
 (def scroll-movement-per-frame 30)
 
+(defn scrollable? [val]
+  (< scroll-movement-per-frame (ocall js/Math :abs val)))
+
 (defn center-node [app-db ctx]
   (let [comp-state (get-in app-db (get-state-app-db-path ctx))
         node-id (get-in app-db [:route :data :node-id])
@@ -77,19 +80,26 @@
             target-scroll-top (max 0 (- node-y el-y))
             scroll-left-diff (- target-scroll-left scroll-left)
             scroll-top-diff (- target-scroll-top scroll-top)]
-        (when (or (not (zero? scroll-left-diff)) (not (zero? scroll-top-diff)))
+        (if (or (scrollable? scroll-left-diff)
+                (scrollable? scroll-top-diff)) 
           (let [max-scroll-diff (max (ocall js/Math :abs scroll-left-diff) (ocall js/Math :abs scroll-top-diff))
                 frame-count (ocall js/Math :ceil (/ max-scroll-diff scroll-movement-per-frame))]
             (t/blocking-raf!
              [::scroll (get-id ctx)]
              (fn [{:keys [times-invoked id]} app-db]
                (let [scroll-left' (oget el :scrollLeft)
-                     scroll-top' (oget el :scrollTop)]
-                 (oset! el :scrollLeft (ocall js/Math :ceil (+ scroll-left' (/ scroll-left-diff frame-count))))
-                 (oset! el :scrollTop (ocall js/Math :ceil (+ scroll-top' (/ scroll-top-diff frame-count))))
+                     scroll-top' (oget el :scrollTop)
+                     frame-target-scroll-left (+ scroll-left' (/ scroll-left-diff frame-count))
+                     frame-target-scroll-top (+ scroll-top' (/ scroll-top-diff frame-count))
+                     last-frame? (= times-invoked frame-count)]
+                 (oset! el :scrollLeft (if last-frame? target-scroll-left frame-target-scroll-left))
+                 (oset! el :scrollTop (if last-frame? target-scroll-top frame-target-scroll-top))
                  (if (= times-invoked frame-count)
                    (t/stop-task app-db id)
-                   app-db))))))))))
+                   app-db)))))
+          (do
+            (oset! el :scrollLeft target-scroll-left)
+            (oset! el :scrollTop target-scroll-top)))))))
 
 (def actions
   {:on-init (pipeline! [value app-db ctx]
