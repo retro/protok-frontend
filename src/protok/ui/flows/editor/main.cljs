@@ -145,14 +145,14 @@
       {:style {:visibility (if node-layout "visible" "hidden")}}
       [render-node ctx state node node-component]]]))
 
-(defn render-edge [id edge _]
+(defn render-edge [id edge edge-color]
   (let [marker-start (if-let [index (:index edge)]
                        (str "edge-circle-" index)
                        "edge-circle")]
     (when-let [points (seq (:points edge))]
       [pathline {:points points
                  :stroke-width 2 
-                 :stroke "rgba(0,0,0,0)" 
+                 :stroke edge-color
                  :fill "none"
                  :marker-end "url(#edge-arrow)"
                  :marker-start (str "url(#" marker-start ")")
@@ -188,7 +188,7 @@
     [:marker {:id (str prefix "-arrow")
               :markerWidth 10
               :markerHeight 10
-              :refX 7
+              :refX 4
               :refY 5
               :orient "auto"
               :viewBox "0 0 20 20"}
@@ -233,12 +233,7 @@
     [:svg.mx-auto.block {:viewBox (str "0 0 " width " " height) :width width :height height}
      [:defs
       [render-markers max-edge-index edge-color]
-      [render-markers max-edge-index (edge-colors :active) "active-edge"]]
-     (map
-      (fn [[id e]]
-        ^{:key id}
-        [render-edge-bg id e edge-color])
-      edges)
+      [render-markers max-edge-index (edge-colors :active) "active-edge"]] 
      (map (fn [n] 
             ^{:key (:id n)}
             [render-svg-node ctx state n])

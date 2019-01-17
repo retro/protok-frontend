@@ -26,6 +26,6 @@ netlify-deploy-production :
 copy-elk-worker :
 	yes | cp -rf node_modules/elkjs/lib/elk-worker.min.js resources/public/js/elk-worker.min.js
 
-deploy : build-prod-js-deps copy-elk-worker build-prod-cljs netlify-deploy
+deploy : build-prod-js-deps build-prod-cljs copy-elk-worker netlify-deploy
 
-deploy-production : build-prod-js-deps copy-elk-worker build-prod-cljs netlify-deploy-production
+deploy-production : build-prod-js-deps build-prod-cljs copy-elk-worker netlify-deploy-production

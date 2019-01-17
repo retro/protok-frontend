@@ -188,17 +188,12 @@
    "elk.spacing.edgeNode" 25
    "elk.layered.spacing.edgeNodeBetweenLayers" 25
    "elk.layered.spacing.edgeEdgeBetweenLayers" 25
-   ;;"elk.layered.nodePlacement.strategy" "NETWORK_SIMPLEX"
-   ;;"elk.layered.layering.strategy" "COFFMAN_GRAHAM"
    "elk.direction" (if (= :horizontal (:direction options)) "RIGHT" "DOWN")
    "elk.edge.thickness" 2
    "elk.hierarchyHandling" "INCLUDE_CHILDREN"
-   ;;"elk.edgeRouting" "POLYLINE"
-   "lk.layered.nodePlacement.favorStraightEdges" false
-   "elk.layered.nodePlacement.bk.fixedAlignment" "BALANCED"
-  ;; "elk.layered.crossingMinimization.hierarchicalSweepiness" 1
-   "elk.partitioning.activate" true})
-
+   "elk.partitioning.activate" true
+   "elk.spacing.portPort" 30
+   "elk.layered.mergeEdges" true})
 
 (defn entrypoint? [node]
   (:isEntrypoint node))
@@ -206,17 +201,58 @@
 (defn get-entrypoint [nodes]
   (first (filter entrypoint? nodes)))
 
-(defn edge->elk-edge [{:keys [from to index]}]
+(defn from-port-id [e]
+  (str "from_" (:from e) "_" (:to e)))
+
+(defn to-port-id [e]
+  (str "to_" (:to e) "_" (:from e)))
+
+(defn edge->elk-edge [{:keys [from to index] :as e}]
   {:id (str from "/" to "/" (or index "_"))
-   :sources [from]
-   :targets [to]
+   :sources [(from-port-id e)]
+   :targets [(to-port-id e)]
    :index index
    :nodeIds [from to]})
 
-(defn node->elk-node [node-dimensions {:keys [id priority]}]
-  (-> (get node-dimensions id)
-      (assoc :id id)
-      (assoc-in [:layoutOptions "elk.partitioning.partition"] priority)))
+(defn get-node-by-id [nodes id]
+  (-> (group-by :id nodes)
+      (get id)
+      first))
+
+(defn node->elk-node [nodes options node-dimensions edges {:keys [id priority] :as n}]
+  (let [vertical? (= :vertical (:direction options))
+        out-ports-side (if vertical? "SOUTH" "EAST")
+        out-ports (map (fn [e]
+                         (let [to (get-node-by-id nodes (:to e))
+                               to-priority (:priority to)
+                               side (cond
+                                      (and vertical? (<= priority to-priority)) "SOUTH"
+                                      (and (not vertical?) (<= priority to-priority)) "EAST"
+                                      vertical? "NORTH"
+                                      :else "WEST")]
+                          {:id (from-port-id e) 
+                           :layoutOptions {"elk.port.side" side}})) 
+                       (sort-by :index (filter #(= id (:from %)) edges)))
+        in-ports (map (fn [e]
+                        (let [from (get-node-by-id nodes (:from e))
+                              from-priority (:priority from)
+                              side (cond
+                                     (and vertical? (<= priority from-priority)) "EAST"
+                                     (and (not vertical?) (<= priority from-priority)) "SOUTH"
+                                     vertical? "NORTH"
+                                     :else "WEST")]
+                          {:id (to-port-id e) 
+                           :layoutOptions {"elk.port.side" side}})) 
+                      (filter #(= id (:to %)) edges))
+        ports (concat out-ports in-ports)
+        ports' (map-indexed (fn [idx p] (assoc-in p [:layoutOptions "elk.port.index"] idx)) (if vertical? (reverse ports) ports))]
+    (-> (get node-dimensions id)
+        (assoc :id id
+               :ports ports'
+               :layoutOptions {"elk.portAlignment.default" "CENTER"
+                               "elk.portConstraints" "FIXED_ORDER"
+                               "elk.partitioning.partition" priority
+                               "elk.priority" (node-type-priority n)}))))
 
 (defn adjust-coordinates [{:keys [x y]} nodes]
   (map 
@@ -242,43 +278,36 @@
         parent-y (oget parent :y)] 
     (->> edges
          (map process-elk-edge)
-         (map #(adjust-edge-coordinates {:x parent-x :y parent-y} %))
-         )))
+         (map #(adjust-edge-coordinates {:x parent-x :y parent-y} %)))))
 
 (defn elk-calculate [options nodes edges node-dimensions]
-  (let [entrypoint (or (get-entrypoint nodes) (first nodes))
-        entrypoint-id (:id entrypoint)
-        entrypoint-edges (filter #(or (= (:from %) entrypoint-id) (= (:to %) entrypoint-id)) edges)
-        nodes' (remove #(= entrypoint %) nodes)
-        edges' (filter #(not (or (= (:from %) entrypoint-id) (= (:to %) entrypoint-id))) edges)
-        g {:id "root"
+  (let [g {:id "root"
            :layoutOptions (get-layout-options options)
-           :children (map #(node->elk-node node-dimensions %) nodes)
+           :children (map #(node->elk-node nodes options node-dimensions edges %) nodes)
            :edges (map edge->elk-edge edges)}
         e (elk. #js{:workerUrl elk-worker-path})]
-    ;;(l/pp g)
     (->> (ocall e :layout (clj->js g))
          (p/map (fn [res]
                   (let [edges (vec (oget res :edges))]
                     (-> {:nodes (into {} (map (fn [n] [(:id n) n]) (get-nodes res)))
                          :edges (into {} (map (fn [e] [(:id e) e]) (concat (get-edges res))))
-                         :dimensions {:height (+ 50 (oget res :height))
-                                      :width (+ 50 (oget res :width))}}
+                         :dimensions {:height (+ (:top min-margins) (oget res :height))
+                                      :width (+ (:left min-margins) (oget res :width))}}
                         add-max-edge-index
-                        force-margins))))
-         (p/error (fn [e]
-                    (println e))))))
+                        force-margins)))))))
 
 (defn sort-nodes [nodes edges]
   (let [entrypoint (or (get-entrypoint nodes) (first nodes))
         entrypoint-id (:id entrypoint)
-        graph (reduce (fn [acc {:keys [from to]}] 
-                        (assoc acc from (set/union (acc from) #{to})))
-                      {} edges)]
+        graph (-> (reduce (fn [acc {:keys [from to]}] 
+                            (assoc acc to (set/union (acc to) #{from})))
+                          {} edges))]
     (->> nodes
-         (map (fn [n] (assoc n :priority (count (first (a* graph entrypoint-id (:id n)))))))
-         ;;(sort-by #(node-type-priority %))
-         )))
+         (map (fn [n]
+                (let [priority (if (= n entrypoint) 1 (count (first (a* graph (:id n) entrypoint-id))))]
+                  (assoc n :priority priority))))
+         (sort-by :id)
+         reverse)))
 
 (defn get-layout [app-db ctx]
   (let [state-path (get-state-app-db-path ctx)
