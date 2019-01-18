@@ -223,7 +223,7 @@
       [:input.mr1
        {:placeholder (get-placeholder input-props)
         :on-change #(forms-ui/<set-value ctx form-props attr (oget % :target.checked))
-        :value (boolean (forms-ui/value-in> ctx form-props attr))
+        :checked (boolean (forms-ui/value-in> ctx form-props attr))
         :type "checkbox"
         :class (class-names {:has-errors (seq errors)
                              (process-classes class) true})}]
