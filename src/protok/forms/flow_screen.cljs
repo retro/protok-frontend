@@ -9,7 +9,8 @@
             [protok.edb :as edb]
             [keechma.toolbox.dataloader.controller :refer [wait-dataloader-pipeline!]]
             [promesa.core :as p]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [clojure.string :as str]))
 
 (defn save-hotspot! [app-db flow-node-id hotspot]
   (let [new? (not (:id hotspot))
@@ -40,6 +41,19 @@
       (dissoc :type :hotspots :projectFile)))
 
 (defrecord Form [validator])
+
+(defmethod forms-core/process-attr-with Form [this path]
+  (when (= [:projectFile] path)
+    (fn [app-db form-props form-state path value]
+      (let [filename (-> (str/split (:serverFilename value) "/")
+                         last
+                         (str/split ".")
+                         first)
+            project-name (str/trim (or (get-in form-state [:data :name]) ""))
+            project-name' (if (empty? project-name) filename project-name)]
+        (-> form-state
+            (assoc-in [:data :name] project-name')
+            (assoc-in [:data :projectFile] value))))))
 
 (defmethod forms-core/get-data Form [this app-db [_ id]]
   (pipeline! [value app-db]

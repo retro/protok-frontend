@@ -101,7 +101,7 @@
     (when active-node-id
       (->> (map 
             (fn [[_ {:keys [node-ids]}]]
-              (when (contains? node-ids active-node-id)
+              (when (contains? node-ids active-node-id) 
                 node-ids))
             edges)
            (filter (complement nil?))
@@ -229,10 +229,10 @@
         active-node-id (:active-node-id state)
         active-edge-id (:active-edge-id state)
         active-edges   (cond 
-                         active-node-id (filter (fn [[_ e]] (contains? (:node-ids e) active-node-id)) edges)
+                         active-node-id (filter (fn [[_ e]] (= (first (:id e)) active-node-id)) edges)
                          active-edge-id (filter (complement nil?) [[active-edge-id (get edges active-edge-id)]])
                          :else          nil)
-        edge-color     (if (seq active-edges) (edge-colors :inactive) (edge-colors :default))
+        edge-color     (if (or active-node-id (seq active-edges)) (edge-colors :inactive) (edge-colors :default))
         max-edge-index (:max-edge-index layout)]
 
     [:svg.mx-auto.block {:viewBox (str "0 0 " width " " height) :width width :height height}
